@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Mon Espace</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dashboard-page {
+            padding: 2rem 0 4rem;
+            min-height: calc(100vh - 80px);
+            background: var(--bg-page);
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .welcome-banner h1 {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-banner p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .action-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 0.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dash-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+        }
+
+        .dash-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rdv-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            background: var(--bg-page);
+            margin-bottom: 0.5rem;
+        }
+
+        .rdv-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .user-avatar-nav {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation (Logged In) -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="SAMA Health" style="height:40px;">
+                <span>SAMA Health</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="active">Tableau de bord</a>
+                <a href="hospitals.html">Hôpitaux</a>
+                <a href="appointment.html">Rendez-vous</a>
+                <div class="auth-links" style="display:flex; align-items:center; gap:0.75rem; margin-left:1rem;">
+                    <a href="profile.html" class="user-avatar-nav" id="nav-avatar" title="Mon profil">?</a>
+                    <a href="profile.html" id="nav-username"
+                        style="font-weight:600; color:var(--primary); text-decoration:none; font-size:0.9rem;">Utilisateur</a>
+                    <button class="btn btn-outline" style="padding:0.4rem 0.75rem; font-size:0.8rem;"
+                        onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-page">
+        <div class="container">
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+                <div>
+                    <h1 id="welcome-text">Bienvenue !</h1>
+                    <p>Gérez vos rendez-vous et consultations depuis votre espace personnel.</p>
+                </div>
+                <div style="display:flex; gap:0.75rem;">
+                    <a href="appointment.html" class="btn btn-white" style="padding:0.6rem 1rem; font-size:0.9rem;">
+                        <i class="fas fa-calendar-plus"></i> Nouveau RDV
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <a href="appointment.html" class="action-card">
+                    <div class="action-icon" style="background:rgba(26,95,171,0.1); color:var(--primary);">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div style="font-weight:700; font-size:0.95rem;">Prendre RDV</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">Réserver un créneau
+                    </div>
+                </a>
+                <a href="hospitals.html" class="action-card">
+                    <div class="action-icon" style="background:rgba(74,174,217,0.1); color:var(--accent);">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                    <div style="font-weight:700; font-size:0.95rem;">Hôpitaux</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">Annuaire complet</div>
+                </a>
+                <a href="specialties.html" class="action-card">
+                    <div class="action-icon" style="background:rgba(16,185,129,0.1); color:var(--success);">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div style="font-weight:700; font-size:0.95rem;">Spécialités</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">Explorer les services
+                    </div>
+                </a>
+                <a href="profile.html" class="action-card">
+                    <div class="action-icon" style="background:rgba(239,68,68,0.1); color:#ef4444;">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <div style="font-weight:700; font-size:0.95rem;">Mon Profil</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">Infos personnelles</div>
+                </a>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Prochains rendez-vous -->
+                <div class="dash-card">
+                    <h3><i class="fas fa-calendar-check" style="color:var(--primary);"></i> Prochains rendez-vous</h3>
+                    <div id="rdv-container">
+                        <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+                            <i class="fas fa-calendar-day"
+                                style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i>
+                            Aucun rendez-vous planifié
+                        </div>
+                    </div>
+                    <a href="appointment.html" class="btn btn-outline" style="width:100%; margin-top:1rem;">
+                        <i class="fas fa-plus"></i> Prendre un rendez-vous
+                    </a>
+                </div>
+
+                <!-- Informations personnelles résumé -->
+                <div class="dash-card">
+                    <h3><i class="fas fa-id-card" style="color:var(--accent);"></i> Mes informations</h3>
+                    <div id="info-container">
+                        <div class="rdv-item">
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Nom complet</span>
+                            <span id="info-name" style="font-weight:600;">-</span>
+                        </div>
+                        <div class="rdv-item">
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Email</span>
+                            <span id="info-email" style="font-weight:600;">-</span>
+                        </div>
+                        <div class="rdv-item">
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Téléphone</span>
+                            <span id="info-phone" style="font-weight:600;">-</span>
+                        </div>
+                        <div class="rdv-item">
+                            <span style="color:var(--text-muted); font-size:0.9rem;">Tranche d'âge</span>
+                            <span id="info-age" style="font-weight:600; color:var(--primary);">-</span>
+                        </div>
+                    </div>
+                    <a href="profile.html" class="btn btn-outline" style="width:100%; margin-top:1rem;">
+                        <i class="fas fa-edit"></i> Modifier le profil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer-bottom" style="border:none; padding-top:0;">
+                <p>&copy; 2026 SAMA Health. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initAuthNavbar, getCurrentUser, supabase } from './supabase-auth.js';
+
+        const user = await initAuthNavbar('dashboard');
+        if (!user) { window.location.href = 'login.html'; }
+
+        const firstName = user.fullName ? user.fullName.split(' ')[0] : 'Utilisateur';
+
+        document.getElementById('welcome-text').textContent = `Bienvenue, ${firstName} 👋`;
+        document.getElementById('info-name').textContent = user.fullName || '-';
+        document.getElementById('info-email').textContent = user.email || '-';
+        document.getElementById('info-phone').textContent = user.phone || '-';
+        document.getElementById('info-age').textContent = user.ageRange || 'Non renseigné';
+
+        // Load appointments from Supabase
+        const { data: appointments } = await supabase
+            .from('appointments')
+            .select('*, hospitals(name)')
+            .eq('user_id', user.id)
+            .order('appointment_date', { ascending: true });
+
+        const container = document.getElementById('rdv-container');
+        if (appointments && appointments.length > 0) {
+            container.innerHTML = '';
+            appointments.slice(0, 3).forEach(appt => {
+                const d = new Date(appt.appointment_date);
+                const dateStr = d.toLocaleDateString('fr', { day: 'numeric', month: 'short' });
+                container.innerHTML += `
+                    <div class="rdv-item">
+                        <div>
+                            <div style="font-weight:700; font-size:0.9rem;">${appt.service}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${appt.hospitals?.name || '-'}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:600; color:var(--primary); font-size:0.85rem;">${dateStr}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${appt.appointment_time || ''}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            document.getElementById('mainNavbar').classList.toggle('scrolled', window.scrollY > 50);
+        });
+    </script>
+</body>
+
+</html>

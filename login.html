@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Connexion</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="auth-layout">
+        <!-- Left Side - Branding -->
+        <div class="auth-branding">
+            <div style="position:relative; z-index:1; max-width:400px;">
+                <img src="images/logo.png" alt="SAMA Health">
+                <h1 style="font-size:2.5rem; margin-bottom:1rem;">SAMA Health</h1>
+                <p style="font-size:1.25rem; color:rgba(255,255,255,0.9); margin-bottom:1.5rem;">Votre plateforme de
+                    Soins Sans Attente</p>
+                <p style="font-size:1rem; color:rgba(255,255,255,0.75); line-height:1.7;">
+                    Gérez vos rendez-vous médicaux en ligne et évitez les files d'attente.
+                    Rejoignez +5000 patients qui gèrent leur santé en ligne.
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="auth-form-side">
+            <div class="auth-form-box">
+                <!-- Mobile Logo -->
+                <div style="text-align:center; margin-bottom:2rem;" class="mobile-logo">
+                    <img src="images/logo.png" alt="SAMA Health" style="height:50px; margin-bottom:0.75rem;">
+                    <h2 style="color:var(--primary); font-size:1.5rem;">SAMA Health</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Soins Sans Attente</p>
+                </div>
+
+                <div
+                    style="background:white; padding:2rem; border-radius:var(--radius-md); border:1px solid var(--border-soft);">
+                    <div style="margin-bottom:2rem;">
+                        <h2 style="font-size:1.5rem; margin-bottom:0.5rem;">Connexion</h2>
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Accédez à votre espace patient</p>
+                    </div>
+
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email ou Téléphone</label>
+                            <div class="form-input-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="text" id="email" class="form-input"
+                                    placeholder="votre@email.com ou +221 77 123 45 67" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                <label class="form-label" for="password" style="margin-bottom:0;">Mot de passe</label>
+                                <a href="#" style="font-size:0.8rem; color:var(--primary); text-decoration:none;">Mot de
+                                    passe oublié?</a>
+                            </div>
+                            <div class="form-input-icon">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"
+                            style="width:100%; padding:0.85rem; margin-top:0.5rem;">
+                            Se connecter
+                        </button>
+                    </form>
+
+                    <div style="text-align:center; margin-top:1.5rem;">
+                        <p style="color:var(--text-muted); font-size:0.9rem;">
+                            Pas encore de compte?
+                            <a href="signup.html"
+                                style="color:var(--primary); font-weight:600; text-decoration:none;">Créer un compte</a>
+                        </p>
+                    </div>
+                </div>
+
+                <p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:1.5rem;">
+                    Rejoignez +5000 patients qui gèrent leur santé en ligne
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @media (min-width: 1024px) {
+            .mobile-logo {
+                display: none;
+            }
+        }
+    </style>
+
+    <script src="script.js"></script>
+    <script type="module">
+        import { supabase } from './supabase-client.js';
+
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Connexion...';
+
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                alert('Identifiants incorrects : ' + error.message);
+                btn.disabled = false;
+                btn.textContent = 'Se connecter';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

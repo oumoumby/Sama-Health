@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Prendre Rendez-vous</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--border-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+            z-index: 2;
+        }
+
+        .step-item.active .step-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .step-item.completed .step-circle {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .step-line {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border-soft);
+            z-index: 1;
+        }
+
+        .step-item:last-child .step-line {
+            display: none;
+        }
+
+        .form-card {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+        }
+
+        .hospital-select-card {
+            cursor: pointer;
+            border: 2px solid var(--border-soft);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .hospital-select-card:hover {
+            border-color: rgba(26, 95, 171, 0.5);
+        }
+
+        .hospital-select-card.selected {
+            border-color: var(--primary);
+            background: rgba(26, 95, 171, 0.05);
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .slot-btn {
+            padding: 0.6rem;
+            border: 2px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            background: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .slot-btn:hover:not(.unavailable):not(.selected) {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .slot-btn.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .slot-btn.unavailable {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background: var(--bg-page);
+        }
+
+        .date-strip {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .date-p {
+            min-width: 70px;
+            padding: 0.75rem;
+            background: white;
+            border: 2px solid var(--border-soft);
+            border-radius: var(--radius-md);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .date-p:hover {
+            border-color: rgba(26, 95, 171, 0.5);
+        }
+
+        .date-p.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="SAMA Health" style="height:40px;">
+                <span>SAMA Health</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Accueil</a>
+                <a href="hospitals.html">Hôpitaux</a>
+                <a href="appointment.html" class="active">Rendez-vous</a>
+                <div class="auth-links" style="display:flex; gap:0.75rem; margin-left:1rem;">
+                    <a href="login.html" class="btn btn-outline"
+                        style="padding:0.5rem 1rem; font-size:0.85rem;">Connexion</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Gradient Header -->
+    <div class="gradient-header" style="text-align:center; padding-bottom:2rem;">
+        <div class="container">
+            <h1 style="font-size:2.2rem; margin-bottom:0.5rem;">Prendre Rendez-vous</h1>
+            <p>Réservez votre créneau et venez à l'heure exacte</p>
+        </div>
+    </div>
+
+    <!-- Step Progress -->
+    <div class="container" style="padding-top:1.5rem;">
+        <div class="step-progress">
+            <div class="step-item active" id="st-1">
+                <div class="step-circle">1</div>
+                <span class="step-label">Hôpital</span>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-item" id="st-2">
+                <div class="step-circle">2</div>
+                <span class="step-label">Service</span>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-item" id="st-3">
+                <div class="step-circle">3</div>
+                <span class="step-label">Horaire</span>
+                <div class="step-line"></div>
+            </div>
+            <div class="step-item" id="st-4">
+                <div class="step-circle">4</div>
+                <span class="step-label">Confirmer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <main class="container" style="padding-bottom:4rem;">
+        <div class="form-card">
+            <!-- Step 1: Select Hospital -->
+            <div id="step-1">
+                <h2 style="font-size:1.4rem; margin-bottom:1.5rem;">Choisissez l'hôpital</h2>
+                <div class="form-input-icon" style="margin-bottom:1rem;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="hosp-search" class="form-input" placeholder="Rechercher un établissement...">
+                </div>
+                <div id="hospitals-list"></div>
+            </div>
+
+            <!-- Step 2: Select Service -->
+            <div id="step-2" style="display:none;">
+                <h2 style="font-size:1.4rem; margin-bottom:0.5rem;">Choisissez le service</h2>
+                <p id="sel-hosp-name" style="color:var(--primary); font-weight:700; margin-bottom:1.5rem;"></p>
+                <div id="services-grid" class="slot-grid"
+                    style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); margin-bottom:1.5rem;"></div>
+                <div class="form-group">
+                    <label class="form-label">Motif de consultation (optionnel)</label>
+                    <textarea id="reason" class="form-input" rows="3"
+                        placeholder="Décrivez brièvement le motif..."></textarea>
+                </div>
+                <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+                    <button class="btn btn-outline" style="flex:1;" onclick="goBack()"><i class="fas fa-arrow-left"
+                            style="margin-right:0.4rem;"></i> Retour</button>
+                    <button class="btn btn-primary" style="flex:1;" onclick="goNext()">Continuer</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Select Date & Time -->
+            <div id="step-3" style="display:none;">
+                <h2 style="font-size:1.4rem; margin-bottom:1.5rem;">Choisissez la date et l'heure</h2>
+                <label class="form-label">Date du rendez-vous</label>
+                <div id="date-selection" class="date-strip"></div>
+                <label class="form-label">Heure du rendez-vous</label>
+                <div id="time-slots" class="slot-grid"></div>
+                <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+                    <button class="btn btn-outline" style="flex:1;" onclick="goBack()"><i class="fas fa-arrow-left"
+                            style="margin-right:0.4rem;"></i> Retour</button>
+                    <button class="btn btn-primary" style="flex:1;" onclick="goNext()">Continuer</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Summary -->
+            <div id="step-4" style="display:none;">
+                <h2 style="font-size:1.4rem; margin-bottom:1.5rem;">Récapitulatif</h2>
+                <div
+                    style="background:var(--bg-page); border-radius:var(--radius-md); padding:1.5rem; border-left:4px solid var(--primary); margin-bottom:1.5rem;">
+                    <div
+                        style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border-soft);">
+                        <span style="color:var(--text-muted);">Établissement</span>
+                        <span id="summ-hosp" style="font-weight:700;">-</span>
+                    </div>
+                    <div
+                        style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border-soft);">
+                        <span style="color:var(--text-muted);">Service</span>
+                        <span id="summ-serv" style="font-weight:700;">-</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding:0.5rem 0;">
+                        <span style="color:var(--text-muted);">Date & Heure</span>
+                        <span id="summ-dt" style="font-weight:700;">-</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.75rem;">
+                    <button class="btn btn-outline" style="flex:1;" onclick="goBack()"><i class="fas fa-arrow-left"
+                            style="margin-right:0.4rem;"></i> Modifier</button>
+                    <button class="btn btn-primary" style="flex:1;" id="confirm-btn">Confirmer le rendez-vous</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer-bottom" style="border:none; padding-top:0;">
+                <p>&copy; 2026 SAMA Health. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="hospitals-loader.js"></script>
+    <script>
+        let currentStep = 1;
+        let appointmentData = { hospital: null, service: null, date: null, time: null, reason: '' };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof window.hospitalsLoader === 'undefined') return;
+
+            renderHospitals();
+
+            const params = new URLSearchParams(window.location.search);
+            const hospId = params.get('hospital');
+            if (hospId) {
+                const hosp = hospitalsLoader.getHospitalById(hospId);
+                if (hosp) selectHospital(hosp);
+            }
+
+            document.getElementById('hosp-search').addEventListener('input', (e) => {
+                renderHospitals(e.target.value);
+            });
+
+            document.getElementById('confirm-btn').addEventListener('click', finalizeBooking);
+        });
+
+        function renderHospitals(filter = '') {
+            const list = document.getElementById('hospitals-list');
+            list.innerHTML = '';
+            const filtered = hospitalsLoader.hospitals.filter(h =>
+                h.name.toLowerCase().includes(filter.toLowerCase()) ||
+                h.address.toLowerCase().includes(filter.toLowerCase())
+            );
+            filtered.forEach(h => {
+                const card = document.createElement('div');
+                card.className = 'hospital-select-card';
+                card.innerHTML = `
+                    <div>
+                        <div style="font-weight:700; color:var(--primary);">${h.name}</div>
+                        <div style="font-size:0.85rem; color:var(--text-muted);"><i class="fas fa-map-marker-alt"></i> ${h.address}</div>
+                    </div>
+                `;
+                card.addEventListener('click', () => selectHospital(h));
+                list.appendChild(card);
+            });
+        }
+
+        function selectHospital(h) {
+            appointmentData.hospital = h;
+            document.getElementById('sel-hosp-name').textContent = h.name;
+            const grid = document.getElementById('services-grid');
+            grid.innerHTML = h.services.map(s => `
+                <div class="slot-btn" onclick="selectService('${s}', this)">${s}</div>
+            `).join('');
+            goNext();
+        }
+
+        function selectService(s, el) {
+            appointmentData.service = s;
+            document.querySelectorAll('#services-grid .slot-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function goNext() {
+            if (currentStep === 1 && !appointmentData.hospital) return;
+            if (currentStep === 2 && !appointmentData.service) return;
+            if (currentStep === 3 && (!appointmentData.date || !appointmentData.time)) return;
+
+            document.getElementById(`step-${currentStep}`).style.display = 'none';
+            document.getElementById(`st-${currentStep}`).classList.add('completed');
+            currentStep++;
+            document.getElementById(`step-${currentStep}`).style.display = 'block';
+            document.getElementById(`st-${currentStep}`).classList.add('active');
+
+            if (currentStep === 3) initCalendar();
+            if (currentStep === 4) updateSummary();
+        }
+
+        function goBack() {
+            document.getElementById(`step-${currentStep}`).style.display = 'none';
+            document.getElementById(`st-${currentStep}`).classList.remove('active');
+            currentStep--;
+            document.getElementById(`step-${currentStep}`).style.display = 'block';
+            document.getElementById(`st-${currentStep}`).classList.remove('completed');
+        }
+
+        function initCalendar() {
+            const dateContainer = document.getElementById('date-selection');
+            const timeContainer = document.getElementById('time-slots');
+
+            const dates = [];
+            const today = new Date();
+            for (let i = 1; i < 8; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                dates.push(d);
+            }
+
+            dateContainer.innerHTML = dates.map(d => `
+                <div class="date-p" onclick="selectDate('${d.toISOString()}', this)">
+                    <div style="font-size:0.7rem; text-transform:uppercase; color:inherit;">${d.toLocaleDateString('fr', { weekday: 'short' })}</div>
+                    <div style="font-size:1.1rem; font-weight:700;">${d.getDate()}</div>
+                    <div style="font-size:0.7rem;">${d.toLocaleDateString('fr', { month: 'short' })}</div>
+                </div>
+            `).join('');
+
+            const times = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'];
+            timeContainer.innerHTML = times.map(t => `
+                <div class="slot-btn" onclick="selectTime('${t}', this)"><i class="fas fa-clock" style="font-size:0.7rem; margin-right:3px;"></i>${t}</div>
+            `).join('');
+        }
+
+        function selectDate(d, el) {
+            appointmentData.date = d;
+            document.querySelectorAll('.date-p').forEach(p => p.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function selectTime(t, el) {
+            appointmentData.time = t;
+            document.querySelectorAll('#time-slots .slot-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function updateSummary() {
+            document.getElementById('summ-hosp').textContent = appointmentData.hospital.name;
+            document.getElementById('summ-serv').textContent = appointmentData.service;
+            const d = new Date(appointmentData.date);
+            document.getElementById('summ-dt').textContent = `${d.toLocaleDateString('fr')} à ${appointmentData.time}`;
+        }
+
+        async function finalizeBooking() {
+            const { supabase } = await import('./supabase-client.js');
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                alert('Veuillez vous connecter pour prendre un rendez-vous.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const dateObj = new Date(appointmentData.date);
+            const dateStr = dateObj.toISOString().split('T')[0];
+
+            const { data, error } = await supabase
+                .from('appointments')
+                .insert({
+                    user_id: user.id,
+                    hospital_id: appointmentData.hospital.id,
+                    service: appointmentData.service,
+                    appointment_date: dateStr,
+                    appointment_time: appointmentData.time
+                })
+                .select()
+                .single();
+
+            if (error) {
+                alert('Erreur : ' + error.message);
+            } else {
+                sessionStorage.setItem('lastAppointment', JSON.stringify({
+                    ...data,
+                    hospital: appointmentData.hospital
+                }));
+                window.location.href = 'appointment-confirmation.html';
+            }
+        }
+
+    </script>
+    <script type="module">
+        import { initAuthNavbar } from './supabase-auth.js';
+        await initAuthNavbar('appointment');
+    </script>
+</body>
+
+</html>

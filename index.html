@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Soins Sans Attente</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="SAMA Health" style="height:40px;">
+                <div>
+                    <span style="display:block; line-height:1.1;">SAMA Health</span>
+                    <small style="font-size:0.6rem; font-weight:500; color:var(--text-muted);">Soins Sans
+                        Attente</small>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="active">Accueil</a>
+                <a href="hospitals.html">Hôpitaux</a>
+                <a href="appointment.html">Rendez-vous</a>
+                <div class="auth-links" style="display:flex; gap:0.75rem; margin-left:1rem;">
+                    <a href="login.html" class="btn btn-outline"
+                        style="padding:0.5rem 1rem; font-size:0.85rem;">Connexion</a>
+                    <a href="signup.html" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.85rem;">Créer
+                        un compte</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Soins Sans Attente,<br>Depuis Chez Vous</h1>
+                <p>Prenez rendez-vous en ligne. Plus de files d'attente, plus de temps perdu.</p>
+                <div class="hero-actions">
+                    <a href="appointment.html" class="btn btn-white">
+                        <i class="fas fa-calendar-alt"></i> Prendre Rendez-vous
+                    </a>
+                    <a href="hospitals.html" class="btn btn-white-outline">
+                        <i class="fas fa-hospital"></i> Voir les Hôpitaux
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image-wrapper">
+                <img src="images/medical-illustration.png" alt="Médecins SAMA Health">
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Why SAMA Health -->
+    <section style="padding: 5rem 0; background: var(--bg-page);">
+        <div class="container">
+            <div style="text-align:center; margin-bottom:3rem;">
+                <h2 style="margin-bottom:0.75rem;">Pourquoi SAMA Health?</h2>
+                <p style="color:var(--text-muted); max-width:600px; margin:0 auto;">Une solution complète pour
+                    moderniser votre accès aux soins</p>
+            </div>
+            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="card-accent">
+                    <div class="icon-wrapper icon-blue"><i class="fas fa-clock"></i></div>
+                    <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">Gain de temps</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Évitez les longues files d'attente. Réservez
+                        votre créneau et arrivez à l'heure.</p>
+                </div>
+                <div class="card-accent accent-sky">
+                    <div class="icon-wrapper icon-sky"><i class="fas fa-map-pin"></i></div>
+                    <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">Zéro déplacement</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Gérez tout depuis votre téléphone. Ne venez
+                        qu'au moment de votre rendez-vous.</p>
+                </div>
+                <div class="card-accent">
+                    <div class="icon-wrapper icon-blue"><i class="fas fa-chart-line"></i></div>
+                    <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">Suivi temps réel</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Suivez l'avancement de votre file et
+                        l'estimation de votre temps d'attente.</p>
+                </div>
+                <div class="card-accent accent-sky">
+                    <div class="icon-wrapper icon-sky"><i class="fas fa-mobile-alt"></i></div>
+                    <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">Interface simple</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Conçu pour être accessible à tous, même sans
+                        compétences techniques.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section style="padding: 5rem 0; background: white;">
+        <div class="container">
+            <div style="text-align:center; margin-bottom:3rem;">
+                <h2 style="margin-bottom:0.75rem;">Comment ça marche?</h2>
+                <p style="color:var(--text-muted); max-width:600px; margin:0 auto;">Trois étapes simples pour gérer vos
+                    soins en ligne</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <div class="step-circle bg-primary">1</div>
+                    <div class="icon-wrapper icon-blue" style="margin:0;"><i class="fas fa-shield-alt"></i></div>
+                    <h3 style="font-size:1.15rem;">Créez un compte</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Inscrivez-vous gratuitement en quelques
+                        minutes avec vos informations de base.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle bg-accent">2</div>
+                    <div class="icon-wrapper icon-sky" style="margin:0;"><i class="fas fa-hospital"></i></div>
+                    <h3 style="font-size:1.15rem;">Choisissez hôpital & service</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Parcourez notre annuaire et sélectionnez
+                        l'hôpital et le service qui vous conviennent.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle bg-primary">3</div>
+                    <div class="icon-wrapper icon-blue" style="margin:0;"><i class="fas fa-calendar-check"></i></div>
+                    <h3 style="font-size:1.15rem;">Prenez votre rendez-vous</h3>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Réservez votre créneau et venez à l'heure
+                        exacte pour votre consultation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section style="padding: 5rem 0; background: var(--bg-page);">
+        <div class="container">
+            <div style="text-align:center; margin-bottom:3rem;">
+                <h2 style="margin-bottom:0.75rem;">Ce que disent nos patients</h2>
+                <p style="color:var(--text-muted);">+5000 patients nous font confiance chaque jour</p>
+            </div>
+            <div class="features-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                            class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="testimonial-text">"Plus besoin de faire la queue pendant des heures. J'ai pris mon
+                        rendez-vous en ligne et je suis arrivée à l'heure exacte. Un vrai gain de temps!"</p>
+                    <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                        <strong style="color:var(--primary);">Fatou Diop</strong>
+                        <span style="color:var(--text-muted);">Dakar</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                            class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="testimonial-text">"SAMA Health a transformé mon expérience à l'hôpital. Je peux suivre mon
+                        ticket en temps réel et savoir exactement quand me présenter."</p>
+                    <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                        <strong style="color:var(--primary);">Moussa Seck</strong>
+                        <span style="color:var(--text-muted);">Pikine</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                            class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="testimonial-text">"Interface très simple à utiliser, même pour quelqu'un comme moi qui
+                        n'est pas à l'aise avec la technologie. Bravo SAMA Health!"</p>
+                    <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                        <strong style="color:var(--primary);">Aïssatou Kane</strong>
+                        <span style="color:var(--text-muted);">Rufisque</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section class="cta-banner">
+        <div class="container">
+            <h2>Prêt à moderniser votre accès aux soins?</h2>
+            <p>Rejoignez +5000 patients qui gèrent leur santé en ligne</p>
+            <a href="signup.html" class="btn btn-white" style="padding:0.9rem 2rem; font-size:1rem;">
+                Créer mon compte gratuitement
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="index.html" class="logo" style="color:white; margin-bottom:1rem;">
+                        <img src="images/logo.png" alt="SAMA Health">
+                        <div>
+                            <span style="display:block; line-height:1.1;">SAMA Health</span>
+                            <small style="font-size:0.6rem; font-weight:500; color:rgba(255,255,255,0.5);">Soins Sans
+                                Attente</small>
+                        </div>
+                    </a>
+                    <p style="font-size:0.9rem; margin-bottom:1rem;">Votre plateforme digitale pour moderniser l'accès
+                        aux soins de santé au Sénégal.</p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Liens rapides</h4>
+                    <ul class="footer-links">
+                        <li><a href="hospitals.html" class="footer-link">Annuaire des hôpitaux</a></li>
+                        <li><a href="appointment.html" class="footer-link">Prendre rendez-vous</a></li>
+                        <li><a href="specialties.html" class="footer-link">Spécialités</a></li>
+                        <li><a href="profile.html" class="footer-link">Mon espace patient</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" class="footer-link">Centre d'aide</a></li>
+                        <li><a href="#" class="footer-link">FAQ</a></li>
+                        <li><a href="#" class="footer-link">Conditions d'utilisation</a></li>
+                        <li><a href="#" class="footer-link">Politique de confidentialité</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt" style="margin-right:8px;"></i> Avenue Nelson Mandela, Dakar
+                        </li>
+                        <li><i class="fas fa-phone" style="margin-right:8px;"></i> +221 78 446 01 61</li>
+                        <li><i class="fas fa-envelope" style="margin-right:8px;"></i> contact@samahealth.sn</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 SAMA Health. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function () {
+            const nav = document.getElementById('mainNavbar');
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        });
+    </script>
+    <script type="module">
+        import { initAuthNavbar } from './supabase-auth.js';
+        await initAuthNavbar('index');
+    </script>
+</body>
+
+</html>

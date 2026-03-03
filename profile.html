@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Mon Profil</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .profile-page {
+            padding: 2rem 0 4rem;
+            min-height: calc(100vh - 80px);
+            background: var(--bg-page);
+        }
+
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+            text-align: center;
+            position: sticky;
+            top: 80px;
+        }
+
+        .avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+        }
+
+        .nav-sidebar {
+            list-style: none;
+            margin-top: 1.5rem;
+            padding: 0;
+        }
+
+        .nav-sidebar li {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .nav-sidebar a:hover,
+        .nav-sidebar a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-sidebar a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+        }
+
+        .profile-section {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-avatar-nav {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation (Logged-in) -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="SAMA Health" style="height:40px;">
+                <span>SAMA Health</span>
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html">Tableau de bord</a>
+                <a href="hospitals.html">Hôpitaux</a>
+                <a href="appointment.html">Rendez-vous</a>
+                <div class="auth-links" style="display:flex; align-items:center; gap:0.75rem; margin-left:1rem;">
+                    <a href="profile.html" class="user-avatar-nav" id="nav-avatar">?</a>
+                    <a href="profile.html" id="nav-username"
+                        style="font-weight:600; color:var(--primary); text-decoration:none; font-size:0.9rem;">Utilisateur</a>
+                    <button class="btn btn-outline" style="padding:0.4rem 0.75rem; font-size:0.8rem;"
+                        onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-page">
+        <div class="container">
+            <div class="profile-layout">
+                <!-- Sidebar -->
+                <aside>
+                    <div class="sidebar-card">
+                        <div class="avatar-large" id="avatar-container">?</div>
+                        <h3 id="sidebar-name" style="font-size:1.1rem; margin-bottom:0.25rem;">Utilisateur</h3>
+                        <p id="sidebar-email" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
+                            email@exemple.com</p>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:1rem;">
+                            <div
+                                style="background:var(--bg-page); padding:0.75rem; border-radius:var(--radius-sm); text-align:center;">
+                                <div style="font-size:1.25rem; font-weight:800; color:var(--primary);" id="stat-rdv">0
+                                </div>
+                                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">RDV
+                                </div>
+                            </div>
+                            <div
+                                style="background:var(--bg-page); padding:0.75rem; border-radius:var(--radius-sm); text-align:center;">
+                                <div style="font-size:1.25rem; font-weight:800; color:var(--accent);" id="stat-age">-
+                                </div>
+                                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Âge
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="nav-sidebar">
+                            <li><a href="#" class="active" data-section="mon-profil"><i class="fas fa-id-card"></i> Mon
+                                    Profil</a></li>
+                            <li><a href="#" data-section="mes-rendez-vous"><i class="fas fa-calendar-check"></i> Mes
+                                    RDV</a></li>
+                            <li><a href="#" data-section="parametres"><i class="fas fa-sliders-h"></i> Paramètres</a>
+                            </li>
+                            <li><a href="#" id="logout-btn-side" style="color:#ef4444;"><i class="fas fa-power-off"></i>
+                                    Déconnexion</a></li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- Content -->
+                <div>
+                    <!-- Section: Mon Profil -->
+                    <div id="section-mon-profil" class="profile-section">
+                        <div class="content-card">
+                            <h2
+                                style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem; font-size:1.3rem;">
+                                <i class="fas fa-user-edit" style="color:var(--primary);"></i> Informations personnelles
+                            </h2>
+                            <form id="update-profile-form">
+                                <div class="form-group" style="margin-bottom:1rem;">
+                                    <label class="form-label">Nom complet</label>
+                                    <input type="text" id="p-fullname" class="form-input" placeholder="Prénom Nom">
+                                </div>
+                                <div class="form-group" style="margin-bottom:1rem;">
+                                    <label class="form-label">Téléphone</label>
+                                    <input type="tel" id="p-phone" class="form-input" placeholder="+221 7X XXX XX XX">
+                                </div>
+                                <div class="form-group" style="margin-bottom:1.5rem;">
+                                    <label class="form-label">Tranche d'âge</label>
+                                    <select id="p-age" class="form-input">
+                                        <option value="">Non renseigné</option>
+                                        <option value="0-17">Moins de 18 ans</option>
+                                        <option value="18-25">18 - 25 ans</option>
+                                        <option value="26-35">26 - 35 ans</option>
+                                        <option value="36-45">36 - 45 ans</option>
+                                        <option value="46-55">46 - 55 ans</option>
+                                        <option value="56-65">56 - 65 ans</option>
+                                        <option value="65+">Plus de 65 ans</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="padding:0.75rem 1.5rem;">
+                                    <i class="fas fa-save" style="margin-right:0.4rem;"></i> Mettre à jour
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Section: Mes RDV -->
+                    <div id="section-mes-rendez-vous" class="profile-section" style="display:none;">
+                        <div class="content-card">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                                <h2 style="margin:0; font-size:1.3rem; display:flex; align-items:center; gap:0.5rem;">
+                                    <i class="fas fa-calendar-alt" style="color:var(--primary);"></i> Mes Rendez-vous
+                                </h2>
+                                <a href="appointment.html" class="btn btn-outline"
+                                    style="padding:0.4rem 0.75rem; font-size:0.85rem;">
+                                    <i class="fas fa-plus"></i> Nouveau
+                                </a>
+                            </div>
+                            <div id="appointments-container">
+                                <div
+                                    style="text-align:center; padding:2rem; border:2px dashed var(--border-soft); border-radius:var(--radius-md);">
+                                    <i class="fas fa-calendar-day"
+                                        style="font-size:2rem; color:var(--border-soft); margin-bottom:0.75rem; display:block;"></i>
+                                    <p style="color:var(--text-muted);">Aucun rendez-vous planifié</p>
+                                    <a href="appointment.html" class="btn btn-primary" style="margin-top:1rem;">Prendre
+                                        un RDV</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Paramètres -->
+                    <div id="section-parametres" class="profile-section" style="display:none;">
+                        <div class="content-card">
+                            <h2 style="margin-bottom:1.5rem; font-size:1.3rem;">Paramètres du compte</h2>
+                            <div style="display:flex; flex-direction:column; gap:1rem;">
+                                <div
+                                    style="display:flex; justify-content:space-between; align-items:center; padding-bottom:1rem; border-bottom:1px solid var(--border-soft);">
+                                    <div>
+                                        <h4 style="margin:0 0 0.25rem; font-size:0.95rem;">Notifications</h4>
+                                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Recevoir des
+                                            alertes pour mes rendez-vous</p>
+                                    </div>
+                                    <input type="checkbox" checked style="width:40px; height:20px; cursor:pointer;">
+                                </div>
+                                <button class="btn btn-outline" id="change-password-btn" style="align-self:flex-start;">
+                                    Changer le mot de passe
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer-bottom" style="border:none; padding-top:0;">
+                <p>&copy; 2026 SAMA Health. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initAuthNavbar, getCurrentUser, supabase } from './supabase-auth.js';
+
+        const user = await initAuthNavbar('profile');
+        if (!user) { window.location.href = 'login.html'; }
+
+        loadProfileData(user);
+        initEvents(user);
+
+        function loadProfileData(user) {
+            const firstName = user.fullName ? user.fullName.split(' ')[0] : 'Utilisateur';
+            const initial = firstName.charAt(0).toUpperCase();
+
+            document.getElementById('avatar-container').textContent = initial;
+            document.getElementById('sidebar-name').textContent = user.fullName || 'Utilisateur';
+            document.getElementById('sidebar-email').textContent = user.email || '';
+            document.getElementById('stat-age').textContent = user.ageRange || '-';
+
+            document.getElementById('p-fullname').value = user.fullName || '';
+            document.getElementById('p-phone').value = user.phone || '';
+            document.getElementById('p-age').value = user.ageRange || '';
+
+            loadAppointments(user);
+        }
+
+        async function loadAppointments(user) {
+            const container = document.getElementById('appointments-container');
+
+            const { data: appointments } = await supabase
+                .from('appointments')
+                .select('*, hospitals(name)')
+                .eq('user_id', user.id)
+                .order('appointment_date', { ascending: true });
+
+            document.getElementById('stat-rdv').textContent = appointments ? appointments.length : 0;
+
+            if (!appointments || appointments.length === 0) return;
+
+            container.innerHTML = '';
+            appointments.forEach(appt => {
+                const d = new Date(appt.appointment_date);
+                const dateStr = d.toLocaleDateString('fr', { weekday: 'short', day: 'numeric', month: 'short' });
+                const div = document.createElement('div');
+                div.style.cssText = 'padding:1rem; margin-bottom:0.75rem; border:1px solid var(--border-soft); border-left:4px solid var(--primary); border-radius:var(--radius-sm);';
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:0.9rem;">${appt.service}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${appt.hospitals?.name || '-'}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:600; color:var(--primary); font-size:0.85rem;">${dateStr}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${appt.appointment_time || ''}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function initEvents(user) {
+            // Sidebar navigation
+            document.querySelectorAll('.nav-sidebar a').forEach(link => {
+                if (link.dataset.section) {
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        document.querySelectorAll('.nav-sidebar a').forEach(a => a.classList.remove('active'));
+                        this.classList.add('active');
+                        document.querySelectorAll('.profile-section').forEach(s => s.style.display = 'none');
+                        document.getElementById('section-' + this.dataset.section).style.display = 'block';
+                    });
+                }
+            });
+
+            // Profile form — save to Supabase
+            document.getElementById('update-profile-form').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const newFullName = document.getElementById('p-fullname').value.trim();
+                const newPhone = document.getElementById('p-phone').value.trim();
+                const newAge = document.getElementById('p-age').value;
+
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({ full_name: newFullName, phone: newPhone, age_range: newAge })
+                    .eq('id', user.id);
+
+                if (error) {
+                    alert('Erreur : ' + error.message);
+                } else {
+                    alert('Profil mis à jour avec succès !');
+                    user.fullName = newFullName;
+                    user.phone = newPhone;
+                    user.ageRange = newAge;
+                    loadProfileData(user);
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn-side').addEventListener('click', async () => {
+                await supabase.auth.signOut();
+                window.location.href = 'index.html';
+            });
+
+            // Change password via Supabase
+            document.getElementById('change-password-btn').addEventListener('click', async function () {
+                const newPwd = prompt('Entrez votre nouveau mot de passe (min. 6 caractères) :');
+                if (newPwd && newPwd.length >= 6) {
+                    const { error } = await supabase.auth.updateUser({ password: newPwd });
+                    if (error) { alert('Erreur : ' + error.message); }
+                    else { alert('Mot de passe changé avec succès !'); }
+                } else if (newPwd) {
+                    alert('Le mot de passe doit avoir au moins 6 caractères');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            document.getElementById('mainNavbar').classList.toggle('scrolled', window.scrollY > 50);
+        });
+    </script>
+</body>
+
+</html>

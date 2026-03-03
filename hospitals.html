@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Annuaire des Hôpitaux</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .search-filter-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            margin-top: -2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-filter-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .search-filter-grid .form-input-icon i {
+            font-size: 0.9rem;
+        }
+
+        .hospitals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .hospital-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+            border-left: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .hospital-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-2px);
+        }
+
+        .hospital-card .specialty-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin: 1rem 0;
+        }
+
+        .results-header {
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .search-filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hospitals-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="SAMA Health" style="height:40px;">
+                <span>SAMA Health</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Accueil</a>
+                <a href="hospitals.html" class="active">Hôpitaux</a>
+                <a href="appointment.html">Rendez-vous</a>
+                <div class="auth-links" style="display:flex; gap:0.75rem; margin-left:1rem;">
+                    <a href="login.html" class="btn btn-outline"
+                        style="padding:0.5rem 1rem; font-size:0.85rem;">Connexion</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Gradient Header -->
+    <div class="gradient-header">
+        <div class="container">
+            <h1 style="font-size:2.5rem;">Annuaire des Hôpitaux</h1>
+            <p>Trouvez l'hôpital et le service qui correspondent à vos besoins</p>
+        </div>
+    </div>
+
+    <!-- Search & Filters (overlapping header) -->
+    <div class="container">
+        <div class="search-filter-card">
+            <div class="search-filter-grid">
+                <div class="form-input-icon">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" class="form-input" placeholder="Rechercher un hôpital...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <main class="container" style="padding-top:2rem; padding-bottom:4rem;">
+        <div class="results-header" id="hospitals-counter">Chargement des établissements...</div>
+        <div class="hospitals-grid" id="hospitals-container">
+            <!-- Dynamically loaded -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer-bottom" style="border:none; padding-top:0;">
+                <p>&copy; 2026 SAMA Health. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="hospitals-loader.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof window.hospitalsLoader !== 'undefined') {
+                hospitalsLoader.loadHospitals('hospitals-container');
+            }
+
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', () => {
+                if (typeof hospitalsLoader !== 'undefined') {
+                    hospitalsLoader.searchHospitals(searchInput.value, 'hospitals-container');
+                }
+            });
+
+            window.addEventListener('scroll', function () {
+                document.getElementById('mainNavbar').classList.toggle('scrolled', window.scrollY > 50);
+            });
+        });
+    </script>
+    <script type="module">
+        import { initAuthNavbar } from './supabase-auth.js';
+        await initAuthNavbar('hospitals');
+    </script>
+</body>
+
+</html>

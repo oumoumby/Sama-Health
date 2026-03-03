@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Inscription</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="auth-layout">
+        <!-- Left Side - Branding -->
+        <div class="auth-branding">
+            <div style="position:relative; z-index:1; max-width:400px;">
+                <img src="images/logo.png" alt="SAMA Health">
+                <h1 style="font-size:2.5rem; margin-bottom:1rem;">SAMA Health</h1>
+                <p style="font-size:1.25rem; color:rgba(255,255,255,0.9); margin-bottom:1.5rem;">Votre plateforme de
+                    Soins Sans Attente</p>
+                <p style="font-size:1rem; color:rgba(255,255,255,0.75); line-height:1.7;">
+                    Gérez vos rendez-vous médicaux en ligne et évitez les files d'attente.
+                    Rejoignez +5000 patients qui gèrent leur santé en ligne.
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="auth-form-side">
+            <div class="auth-form-box">
+                <!-- Mobile Logo -->
+                <div style="text-align:center; margin-bottom:2rem;" class="mobile-logo">
+                    <img src="images/logo.png" alt="SAMA Health" style="height:50px; margin-bottom:0.75rem;">
+                    <h2 style="color:var(--primary); font-size:1.5rem;">SAMA Health</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Soins Sans Attente</p>
+                </div>
+
+                <div
+                    style="background:white; padding:2rem; border-radius:var(--radius-md); border:1px solid var(--border-soft);">
+                    <div style="margin-bottom:1.5rem;">
+                        <h2 style="font-size:1.5rem; margin-bottom:0.5rem;">Créer un compte</h2>
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Rejoignez SAMA Health gratuitement</p>
+                    </div>
+
+                    <form id="signup-form">
+                        <div class="form-group">
+                            <label class="form-label" for="fullName">Nom complet</label>
+                            <div class="form-input-icon">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="fullName" class="form-input" placeholder="Prénom Nom" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Téléphone</label>
+                            <div class="form-input-icon">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="phone" class="form-input" placeholder="+221 77 123 45 67"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email</label>
+                            <div class="form-input-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="email" class="form-input" placeholder="votre@email.com"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="password">Mot de passe</label>
+                            <div class="form-input-icon" style="position:relative;">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+                                <i class="fas fa-eye" id="toggle-password" onclick="togglePassword('password', this)"
+                                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); font-size:0.9rem;"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirmPassword">Confirmer le mot de passe</label>
+                            <div class="form-input-icon" style="position:relative;">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="confirmPassword" class="form-input" placeholder="••••••••"
+                                    required>
+                                <i class="fas fa-eye" id="toggle-confirm"
+                                    onclick="togglePassword('confirmPassword', this)"
+                                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); font-size:0.9rem;"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="ageRange">Date de naissance (tranche d'âge)</label>
+                            <div class="form-input-icon">
+                                <!-- <i class="fas fa-birthday-cake"></i> -->
+                                <select id="ageRange" class="form-input" required>
+                                    <option value="">Choisir...</option>
+                                    <option value="0-17">Moins de 18 ans</option>
+                                    <option value="18-25">18 - 25 ans</option>
+                                    <option value="26-35">26 - 35 ans</option>
+                                    <option value="36-45">36 - 45 ans</option>
+                                    <option value="46-55">46 - 55 ans</option>
+                                    <option value="56-65">56 - 65 ans</option>
+                                    <option value="65+">Plus de 65 ans</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"
+                            style="width:100%; padding:0.85rem; margin-top:0.5rem;">
+                            Créer mon compte
+                        </button>
+                    </form>
+
+                    <div style="text-align:center; margin-top:1.5rem;">
+                        <p style="color:var(--text-muted); font-size:0.9rem;">
+                            Déjà un compte?
+                            <a href="login.html" style="color:var(--primary); font-weight:600; text-decoration:none;">Se
+                                connecter</a>
+                        </p>
+                    </div>
+                </div>
+
+                <p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:1.5rem;">
+                    Rejoignez +5000 patients qui gèrent leur santé en ligne
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @media (min-width: 1024px) {
+            .mobile-logo {
+                display: none;
+            }
+        }
+    </style>
+
+    <script src="script.js"></script>
+    <script>
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+    <script type="module">
+        import { supabase } from './supabase-client.js';
+
+        document.getElementById('signup-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const ageRange = document.getElementById('ageRange').value;
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (password !== confirm) {
+                alert('Les mots de passe ne correspondent pas');
+                return;
+            }
+
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Création en cours...';
+
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: { full_name: fullName, phone, age_range: ageRange }
+                }
+            });
+
+            if (error) {
+                alert('Erreur : ' + error.message);
+                btn.disabled = false;
+                btn.textContent = 'Créer mon compte';
+            } else {
+                alert('Compte créé avec succès !');
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

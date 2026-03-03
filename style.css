@@ -1,0 +1,896 @@
+/* style.css - Sama Health - Figma Fusion Edition */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ======================== DESIGN TOKENS ======================== */
+:root {
+    /* SAMA Health Brand Colors */
+    --primary: #1A5FAB;
+    --primary-light: rgba(26, 95, 171, 0.1);
+    --primary-dark: #154d8c;
+    --accent: #4AAED9;
+    --accent-light: rgba(74, 174, 217, 0.1);
+
+    /* Semantic */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #d4183d;
+    --info: #3b82f6;
+
+    /* Neutrals */
+    --text-main: #1C2B3A;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --bg-white: #ffffff;
+    --bg-page: #F4F7FC;
+    --bg-soft: #f8fafc;
+    --bg-dark: #1C2B3A;
+    --border-soft: rgba(26, 95, 171, 0.1);
+    --border-medium: #cbd5e1;
+
+    /* Effects */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 25px rgba(26, 95, 171, 0.08);
+    --shadow-xl: 0 20px 40px rgba(26, 95, 171, 0.12);
+
+    /* Radii & Transitions */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-full: 9999px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ======================== BASE ======================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ======================== TYPOGRAPHY ======================== */
+h1,
+h2,
+h3,
+h4 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-main);
+}
+
+h1 {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    letter-spacing: -0.02em;
+}
+
+h2 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+}
+
+h3 {
+    font-size: 1.4rem;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ======================== NAVBAR ======================== */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 0.75rem 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.navbar.scrolled {
+    box-shadow: var(--shadow-md);
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.logo i {
+    font-size: 1.8rem;
+    color: var(--primary);
+}
+
+.logo img {
+    height: 40px;
+    width: auto;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-link,
+.nav-links a:not(.btn) {
+    font-weight: 500;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 0.95rem;
+}
+
+.nav-link:hover,
+.nav-links a:not(.btn):hover,
+.nav-link.active,
+.nav-links a:not(.btn).active {
+    color: var(--primary);
+}
+
+/* ======================== BUTTONS ======================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 14px rgba(26, 95, 171, 0.3);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 95, 171, 0.4);
+}
+
+.btn-secondary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-outline:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-white {
+    background: white;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.btn-white:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+.btn-white-outline {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+}
+
+.btn-white-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.btn-ghost:hover {
+    background: var(--bg-soft);
+    color: var(--primary);
+}
+
+/* ======================== HERO ======================== */
+.hero {
+    position: relative;
+    padding: 7rem 0 8rem;
+    background: linear-gradient(135deg, rgba(26, 95, 171, 0.75) 0%, rgba(74, 174, 217, 0.65) 100%),
+        url('images/medical-illustration.png') center/cover no-repeat;
+    color: white;
+    overflow: hidden;
+}
+
+.hero .container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 700px;
+}
+
+.hero-content {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-content h1 {
+    color: white;
+    margin-bottom: 1.5rem;
+    animation: heroTextReveal 1s ease-out forwards;
+}
+
+@keyframes heroTextReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+        letter-spacing: 0.1em;
+    }
+
+    60% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1.01);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        letter-spacing: -0.02em;
+    }
+}
+
+.hero-content p {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    max-width: 540px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-image-wrapper {
+    display: none;
+}
+
+.floating-card {
+    position: absolute;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-lg);
+    animation: float 4s ease-in-out infinite;
+    display: flex;
+    align-items: center;
+}
+
+/* ======================== STATS BAR ======================== */
+.stats-bar {
+    background: white;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 2.5rem 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    text-align: center;
+}
+
+.stat-item .stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.stat-item .stat-label {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* ======================== CARDS ======================== */
+.features-grid,
+.hospitals-grid,
+.specialties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.premium-card {
+    background: var(--bg-white);
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-soft);
+    transition: var(--transition);
+    height: 100%;
+}
+
+.premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Accent left-border card (Figma style) */
+.card-accent {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-soft);
+    border-left: 4px solid var(--primary);
+    transition: var(--transition);
+}
+
+.card-accent:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+}
+
+.card-accent.accent-sky {
+    border-left-color: var(--accent);
+}
+
+/* Icon wrapper */
+.icon-wrapper {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    transition: var(--transition);
+}
+
+.icon-blue {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.icon-sky {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.icon-teal {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+/* ======================== STEPS (Comment ça marche) ======================== */
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    text-align: center;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.step-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+}
+
+.step-circle.bg-primary {
+    background: var(--primary);
+}
+
+.step-circle.bg-accent {
+    background: var(--accent);
+}
+
+/* ======================== TESTIMONIALS ======================== */
+.testimonial-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-soft);
+    transition: var(--transition);
+}
+
+.testimonial-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.testimonial-stars {
+    color: #facc15;
+    margin-bottom: 0.75rem;
+}
+
+.testimonial-text {
+    font-style: italic;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    line-height: 1.7;
+}
+
+/* ======================== CTA BANNER ======================== */
+.cta-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    padding: 5rem 0;
+    text-align: center;
+    color: white;
+}
+
+.cta-banner h2 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.cta-banner p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+/* ======================== GRADIENT HEADER (Inner Pages) ======================== */
+.gradient-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: white;
+    padding: 3rem 0;
+}
+
+.gradient-header h1 {
+    color: white;
+    margin-bottom: 0.75rem;
+}
+
+.gradient-header p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+}
+
+/* ======================== FORMS ======================== */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border-soft);
+    background: white;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 95, 171, 0.1);
+}
+
+.form-input-icon {
+    position: relative;
+}
+
+.form-input-icon>i:first-child {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.form-input-icon .form-input {
+    padding-left: 2.75rem;
+}
+
+/* ======================== BADGES ======================== */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.badge-error {
+    background: rgba(212, 24, 61, 0.1);
+    color: var(--error);
+}
+
+.badge-info {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+/* ======================== TABS ======================== */
+.tabs-nav {
+    display: flex;
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 4px;
+    box-shadow: var(--shadow-sm);
+    gap: 4px;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ======================== PROGRESS STEPPER ======================== */
+.progress-stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.stepper-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stepper-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.stepper-circle.completed,
+.stepper-circle.active {
+    background: var(--primary);
+    color: white;
+}
+
+.stepper-circle.pending {
+    background: #e2e8f0;
+    color: var(--text-muted);
+}
+
+/* ======================== FOOTER ======================== */
+.footer {
+    background: var(--bg-dark);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 4rem 0 2rem;
+    margin-top: 5rem;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.footer-col h4 {
+    color: white;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 0.75rem;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.footer-link:hover {
+    color: var(--accent);
+}
+
+.social-icons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.social-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.social-icon:hover {
+    background: var(--primary);
+}
+
+.footer-bottom {
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* ======================== AUTH SPLIT LAYOUT ======================== */
+.auth-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.auth-branding {
+    display: none;
+    width: 50%;
+    background: linear-gradient(135deg, rgba(26, 95, 171, 0.8) 0%, rgba(74, 174, 217, 0.75) 100%),
+        url('images/medical-illustration.png') center/cover no-repeat;
+    color: white;
+    padding: 3rem;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-branding::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==");
+    opacity: 0.3;
+}
+
+.auth-branding h1 {
+    color: white;
+}
+
+.auth-form-side {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: white;
+}
+
+.auth-form-box {
+    width: 100%;
+    max-width: 440px;
+}
+
+@media (min-width: 1024px) {
+    .auth-branding {
+        display: flex;
+    }
+
+    .auth-form-side {
+        width: 50%;
+    }
+}
+
+/* ======================== ANIMATIONS ======================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+/* ======================== RESPONSIVE ======================== */
+@media (max-width: 1024px) {
+    .hero .container {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .hero-content p {
+        margin: 0 auto 2rem;
+    }
+
+    .hero-actions {
+        justify-content: center;
+    }
+
+    .hero-image-wrapper {
+        display: none;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .gradient-header {
+        padding: 2rem 0;
+    }
+
+    .gradient-header h1 {
+        font-size: 1.8rem;
+    }
+}

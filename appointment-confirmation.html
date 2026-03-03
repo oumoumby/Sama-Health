@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Confirmation de Rendez-vous</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .confirm-container {
+            max-width: 550px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 4rem;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--success);
+        }
+
+        .details-card {
+            background: white;
+            border: 1px solid var(--border-soft);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: left;
+            margin: 1.5rem 0;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 0.9rem;
+        }
+
+        .detail-row:last-child {
+            border: none;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+        }
+
+        .detail-value {
+            font-weight: 700;
+        }
+
+        .qr-box {
+            margin: 1.5rem auto;
+            width: 160px;
+            height: 160px;
+            background: white;
+            border: 2px solid var(--border-soft);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+        }
+
+        .qr-box canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="SAMA Health" style="height:40px;">
+                <span>SAMA Health</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Accueil</a>
+                <a href="hospitals.html">Hôpitaux</a>
+                <a href="appointment.html">Rendez-vous</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Gradient Header -->
+    <div class="gradient-header" style="text-align:center;">
+        <div class="container">
+            <h1 style="font-size:2rem;">Rendez-vous Confirmé</h1>
+        </div>
+    </div>
+
+    <main class="confirm-container">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2 style="margin-bottom:0.5rem; font-size:1.5rem;">Rendez-vous confirmé !</h2>
+        <p style="color:var(--text-muted); margin-bottom:1.5rem;">Votre rendez-vous a été enregistré avec succès.
+            Présentez-vous à l'heure convenue.</p>
+
+        <div class="details-card">
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-hashtag" style="margin-right:6px;"></i>ID</span>
+                <span class="detail-value" id="conf-id">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-hospital" style="margin-right:6px;"></i>Hôpital</span>
+                <span class="detail-value" id="conf-hosp">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-stethoscope" style="margin-right:6px;"></i>Service</span>
+                <span class="detail-value" id="conf-serv">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label"><i class="fas fa-calendar" style="margin-right:6px;"></i>Date & Heure</span>
+                <span class="detail-value" id="conf-dt">-</span>
+            </div>
+        </div>
+
+
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+            <a href="index.html" class="btn btn-outline" style="flex:1;">
+                <i class="fas fa-home" style="margin-right:0.4rem;"></i> Accueil
+            </a>
+            <a href="appointment.html" class="btn btn-primary" style="flex:1;">
+                <i class="fas fa-calendar-plus" style="margin-right:0.4rem;"></i> Nouveau RDV
+            </a>
+        </div>
+    </main>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer-bottom" style="border:none; padding-top:0;">
+                <p>&copy; 2026 SAMA Health. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const appt = JSON.parse(sessionStorage.getItem('lastAppointment'));
+            if (appt) {
+                document.getElementById('conf-id').textContent = appt.id || '-';
+                document.getElementById('conf-hosp').textContent = appt.hospital ? appt.hospital.name : '-';
+                document.getElementById('conf-serv').textContent = appt.service || '-';
+                const d = new Date(appt.appointment_date);
+                document.getElementById('conf-dt').textContent = `${d.toLocaleDateString('fr')} à ${appt.appointment_time}`;
+            }
+        });
+    </script>
+    <script type="module">
+        import { initAuthNavbar } from './supabase-auth.js';
+        await initAuthNavbar('confirmation');
+    </script>
+</body>
+
+</html>

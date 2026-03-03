@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Simple Images</title>
+    <style>
+        body { padding: 20px; font-family: Arial; }
+        img { width: 300px; height: 200px; object-fit: cover; border: 2px solid red; margin: 10px; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Test simple des images</h1>
+    
+    <div id="test-container"></div>
+    
+    <script>
+        // TEST 1: Images locales
+        const localImages = [
+            "images/hospitals/hopital1.jpg",
+            "images/hospitals/default.jpg",
+            "test.jpg",  // image directe dans le dossier
+            "./images/hospitals/hopital1.jpg",
+            "/images/hospitals/hopital1.jpg"
+        ];
+        
+        const container = document.getElementById('test-container');
+        
+        localImages.forEach(imgPath => {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <h3>Test: ${imgPath}</h3>
+                <img src="${imgPath}" alt="Test">
+                <p class="error">En attente...</p>
+                <hr>
+            `;
+            container.appendChild(div);
+            
+            // Vérifier si l'image charge
+            const img = div.querySelector('img');
+            img.onload = function() {
+                div.querySelector('.error').textContent = "✓ Image chargée avec succès";
+                div.querySelector('.error').style.color = "green";
+            };
+            img.onerror = function() {
+                div.querySelector('.error').textContent = "✗ Erreur: Image non trouvée";
+            };
+        });
+        
+        // TEST 2: Images en ligne (backup)
+        const onlineImages = [
+            "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=300&h=200&fit=crop",
+            "https://images.unsplash.com/photo-1586773860418-dc22f8b874bc?w=300&h=200&fit=crop"
+        ];
+        
+        const onlineDiv = document.createElement('div');
+        onlineDiv.innerHTML = '<h2>Test avec images en ligne (backup)</h2>';
+        container.appendChild(onlineDiv);
+        
+        onlineImages.forEach(imgUrl => {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <img src="${imgUrl}" alt="Online test">
+                <p>Image en ligne de test</p>
+                <hr>
+            `;
+            container.appendChild(div);
+        });
+    </script>
+</body>
+</html>
