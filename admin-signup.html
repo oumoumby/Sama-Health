@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health | Inscription Espace Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="auth-layout">
+        <!-- Left Side - Branding -->
+        <div class="auth-branding" style="background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);">
+            <div style="position:relative; z-index:1; max-width:400px;">
+                <img src="images/logo.png" alt="SAMA Health">
+                <h1 style="font-size:2.5rem; margin-bottom:1rem;">SAMA Health Pro</h1>
+                <p style="font-size:1.25rem; color:rgba(255,255,255,0.9); margin-bottom:1.5rem;">Espace d'Administration
+                </p>
+                <p style="font-size:1rem; color:rgba(255,255,255,0.75); line-height:1.7;">
+                    Gérez les rendez-vous de votre établissement médical en temps réel.
+                    Prenez le contrôle de votre agenda médical.
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="auth-form-side">
+            <div class="auth-form-box">
+                <!-- Mobile Logo -->
+                <div style="text-align:center; margin-bottom:2rem;" class="mobile-logo">
+                    <img src="images/logo.png" alt="SAMA Health" style="height:50px; margin-bottom:0.75rem;">
+                    <h2 style="color:var(--primary); font-size:1.5rem;">SAMA Health Pro</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Administration</p>
+                </div>
+
+                <div
+                    style="background:white; padding:2rem; border-radius:var(--radius-md); border:1px solid var(--border-soft);">
+                    <div style="margin-bottom:1.5rem;">
+                        <h2 style="font-size:1.5rem; margin-bottom:0.5rem;">Accès Établissement</h2>
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Créez un compte pour votre hôpital</p>
+                    </div>
+
+                    <form id="admin-signup-form">
+                        <div class="form-group">
+                            <label class="form-label" for="hospitalId">Établissement rattaché</label>
+                            <div class="form-input-icon">
+                                <i class="fas fa-hospital"></i>
+                                <select id="hospitalId" class="form-input" required>
+                                    <option value="">Chargement des hôpitaux...</option>
+                                    <!-- Options injected by JS -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="fullName">Nom complet de l'administrateur</label>
+                            <div class="form-input-icon">
+                                <i class="fas fa-user-tie"></i>
+                                <input type="text" id="fullName" class="form-input" placeholder="Prénom Nom" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Téléphone professionnel</label>
+                            <div class="form-input-icon">
+                                <i class="fas fa-phone-office"></i>
+                                <input type="tel" id="phone" class="form-input" placeholder="+221 7X XXX XX XX"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email professionnel</label>
+                            <div class="form-input-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="email" class="form-input" placeholder="admin@hopital.com"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="password">Mot de passe sécurisé</label>
+                            <div class="form-input-icon" style="position:relative;">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+                                <i class="fas fa-eye" id="toggle-password" onclick="togglePassword('password', this)"
+                                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-muted); font-size:0.9rem;"></i>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"
+                            style="width:100%; padding:0.85rem; margin-top:0.5rem;">
+                            Créer le compte Administrateur
+                        </button>
+                    </form>
+
+                    <div style="text-align:center; margin-top:1.5rem;">
+                        <p style="color:var(--text-muted); font-size:0.9rem;">
+                            Déjà un compte pro?
+                            <a href="admin-login.html"
+                                style="color:var(--primary); font-weight:600; text-decoration:none;">Se
+                                connecter</a>
+                        </p>
+                    </div>
+                </div>
+
+                <p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:1.5rem;">
+                    Espace strictement réservé au personnel soignant et administratif
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .fa-phone-office::before {
+            content: "\f095";
+        }
+
+        @media (min-width: 1024px) {
+            .mobile-logo {
+                display: none;
+            }
+        }
+    </style>
+
+    <script src="script.js"></script>
+    <script>
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+    <script type="module">
+        import { supabase } from './supabase-client.js';
+
+        // Load hospitals for the dropdown
+        async function loadHospitals() {
+            const select = document.getElementById('hospitalId');
+            try {
+                const { data, error } = await supabase.from('hospitals').select('id, name').order('name');
+                if (error) throw error;
+
+                select.innerHTML = '<option value="">Sélectionnez votre établissement...</option>';
+                data.forEach(h => {
+                    const opt = document.createElement('option');
+                    opt.value = h.id;
+                    opt.textContent = h.name;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                console.error("Erreur de chargement des hôpitaux", err);
+                select.innerHTML = '<option value="">Erreur de chargement - Rafraîchir</option>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadHospitals);
+
+        document.getElementById('admin-signup-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const hospitalId = document.getElementById('hospitalId').value;
+
+            if (!hospitalId) {
+                alert("Veuillez sélectionner un établissement");
+                return;
+            }
+
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Création en cours...';
+
+            // Sign up and pass role='admin' + hospital_id to metadata
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: { full_name: fullName, phone, role: 'admin', hospital_id: parseInt(hospitalId) }
+                }
+            });
+
+            if (error) {
+                alert('Erreur : ' + error.message);
+                btn.disabled = false;
+                btn.textContent = 'Créer le compte Administrateur';
+            } else {
+                alert('Compte Administrateur créé avec succès !');
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

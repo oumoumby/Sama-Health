@@ -1,67 +1,17 @@
 -- ============================================================
--- SAMA Health — Supabase Database Schema
+-- SAMA Health — Supabase Database Schema INTEGRAL
 -- Exécuter dans : Supabase Dashboard > SQL Editor
 -- ============================================================
 
--- Nettoyage (permet de relancer le script sans erreur)
-DROP VIEW IF EXISTS public.hospitals_with_services;
-DROP TABLE IF EXISTS public.appointments;
-DROP TABLE IF EXISTS public.hospital_services;
-DROP TABLE IF EXISTS public.services;
-DROP TABLE IF EXISTS public.hospitals;
-DROP TABLE IF EXISTS public.profiles;
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP FUNCTION IF EXISTS public.handle_new_user();
-
--- ======================== PROFILES ========================
--- Extension de auth.users pour stocker les infos supplémentaires
-CREATE TABLE public.profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    full_name TEXT NOT NULL,
-    phone TEXT,
-    age_range TEXT CHECK (age_range IN ('0-17','18-25','26-35','36-45','46-55','56-65','65+')),
-    avatar_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Index
-CREATE INDEX idx_profiles_full_name ON public.profiles(full_name);
-
--- RLS (Row Level Security)
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Les utilisateurs peuvent voir leur propre profil"
-    ON public.profiles FOR SELECT
-    USING (auth.uid() = id);
-
-CREATE POLICY "Les utilisateurs peuvent modifier leur propre profil"
-    ON public.profiles FOR UPDATE
-    USING (auth.uid() = id);
-
-CREATE POLICY "Les utilisateurs peuvent insérer leur propre profil"
-    ON public.profiles FOR INSERT
-    WITH CHECK (auth.uid() = id);
-
--- Trigger : créer automatiquement un profil après inscription
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO public.profiles (id, full_name, phone, age_range)
-    VALUES (
-        NEW.id,
-        COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-        COALESCE(NEW.raw_user_meta_data->>'phone', ''),
-        COALESCE(NEW.raw_user_meta_data->>'age_range', NULL)
-    );
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
+-- Nettoyage forcé (permet de repartir de zéro sans erreur)
+DROP VIEW IF EXISTS public.hospitals_with_services CASCADE;
+DROP TABLE IF EXISTS public.appointments CASCADE;
+DROP TABLE IF EXISTS public.hospital_services CASCADE;
+DROP TABLE IF EXISTS public.services CASCADE;
+DROP TABLE IF EXISTS public.hospitals CASCADE;
+DROP TABLE IF EXISTS public.profiles CASCADE;
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users CASCADE;
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
 
 -- ======================== HÔPITAUX ========================
 CREATE TABLE public.hospitals (
@@ -79,11 +29,7 @@ CREATE TABLE public.hospitals (
 );
 
 ALTER TABLE public.hospitals ENABLE ROW LEVEL SECURITY;
-
--- Tout le monde peut lire les hôpitaux
-CREATE POLICY "Lecture publique des hôpitaux"
-    ON public.hospitals FOR SELECT
-    USING (true);
+CREATE POLICY "Lecture publique des hôpitaux" ON public.hospitals FOR SELECT USING (true);
 
 
 -- ======================== SPÉCIALITÉS / SERVICES ========================
@@ -97,10 +43,7 @@ CREATE TABLE public.services (
 );
 
 ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Lecture publique des services"
-    ON public.services FOR SELECT
-    USING (true);
+CREATE POLICY "Lecture publique des services" ON public.services FOR SELECT USING (true);
 
 
 -- ======================== RELATION HÔPITAUX ↔ SERVICES ========================
@@ -111,10 +54,59 @@ CREATE TABLE public.hospital_services (
 );
 
 ALTER TABLE public.hospital_services ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Lecture publique hospital_services" ON public.hospital_services FOR SELECT USING (true);
 
-CREATE POLICY "Lecture publique hospital_services"
-    ON public.hospital_services FOR SELECT
+
+-- ======================== PROFILES (Patients & Admins) ========================
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    full_name TEXT NOT NULL,
+    phone TEXT,
+    age_range TEXT CHECK (age_range IN ('0-17','18-25','26-35','36-45','46-55','56-65','65+')),
+    avatar_url TEXT,
+    role TEXT DEFAULT 'patient' CHECK (role IN ('patient','admin')),
+    hospital_id INT REFERENCES public.hospitals(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_profiles_full_name ON public.profiles(full_name);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- IMPORTANT: Permet aux admins et patients de lire les noms pour le tableau de bord
+CREATE POLICY "Lecture des profils pour les utilisateurs connectés"
+    ON public.profiles FOR SELECT
+    TO authenticated
     USING (true);
+
+CREATE POLICY "Les utilisateurs peuvent modifier leur propre profil"
+    ON public.profiles FOR UPDATE
+    USING (auth.uid() = id);
+
+CREATE POLICY "Les utilisateurs peuvent insérer leur propre profil"
+    ON public.profiles FOR INSERT
+    WITH CHECK (auth.uid() = id);
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, full_name, phone, age_range, role, hospital_id)
+    VALUES (
+        NEW.id,
+        COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+        COALESCE(NEW.raw_user_meta_data->>'phone', ''),
+        COALESCE(NEW.raw_user_meta_data->>'age_range', NULL),
+        COALESCE(NEW.raw_user_meta_data->>'role', 'patient'),
+        (NEW.raw_user_meta_data->>'hospital_id')::INT
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 
 -- ======================== RENDEZ-VOUS ========================
@@ -125,7 +117,8 @@ CREATE TABLE public.appointments (
     service TEXT NOT NULL,
     appointment_date DATE NOT NULL,
     appointment_time TEXT NOT NULL,
-    status TEXT DEFAULT 'confirmed' CHECK (status IN ('confirmed','cancelled','completed')),
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending','confirmed','rejected','cancelled','completed')),
+    rejection_reason TEXT,
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -135,18 +128,33 @@ CREATE INDEX idx_appointments_date ON public.appointments(appointment_date);
 
 ALTER TABLE public.appointments ENABLE ROW LEVEL SECURITY;
 
--- Les utilisateurs voient uniquement leurs propres RDV
-CREATE POLICY "Les utilisateurs peuvent voir leurs RDV"
+CREATE POLICY "Les utilisateurs voient leurs RDV et admins voient pour leur hopital"
     ON public.appointments FOR SELECT
-    USING (auth.uid() = user_id);
+    USING (
+        auth.uid() = user_id OR 
+        (EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE profiles.id = auth.uid() 
+            AND profiles.role = 'admin' 
+            AND profiles.hospital_id = appointments.hospital_id
+        ))
+    );
 
 CREATE POLICY "Les utilisateurs peuvent créer un RDV"
     ON public.appointments FOR INSERT
     WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Les utilisateurs peuvent annuler leurs RDV"
+CREATE POLICY "Les utilisateurs annulent leurs RDV, les admins mettent à jour les statuts"
     ON public.appointments FOR UPDATE
-    USING (auth.uid() = user_id);
+    USING (
+        auth.uid() = user_id OR 
+        (EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE profiles.id = auth.uid() 
+            AND profiles.role = 'admin' 
+            AND profiles.hospital_id = appointments.hospital_id
+        ))
+    );
 
 CREATE POLICY "Les utilisateurs peuvent supprimer leurs RDV"
     ON public.appointments FOR DELETE
@@ -154,10 +162,9 @@ CREATE POLICY "Les utilisateurs peuvent supprimer leurs RDV"
 
 
 -- ============================================================
--- DONNÉES INITIALES
+-- DONNÉES INITIALES (Création Automatique)
 -- ============================================================
 
--- Insérer les services/spécialités
 INSERT INTO public.services (name, description, icon, category) VALUES
 ('Consultation Générale', 'Diagnostic et prise en charge des pathologies courantes pour adultes et enfants.', 'fas fa-stethoscope', 'consultation'),
 ('Urgences', 'Prise en charge vitale immédiate avec plateau technique complet.', 'fas fa-ambulance', 'urgence'),
@@ -179,7 +186,6 @@ INSERT INTO public.services (name, description, icon, category) VALUES
 ('Imagerie Médicale', 'Diagnostic par imagerie : échographie, scanner, IRM.', 'fas fa-x-ray', 'diagnostic'),
 ('Nutrition', 'Conseils nutritionnels et prise en charge diététique.', 'fas fa-apple-alt', 'therapie');
 
--- Insérer les hôpitaux
 INSERT INTO public.hospitals (id, name, address, phone, description, image_url, rating, latitude, longitude, opening_hours) VALUES
 (1, 'Hôpital Principal de Dakar', 'Avenue Nelson Mandela, Dakar', '+221 33 839 50 50', 'Hôpital public principal de Dakar offrant une large gamme de services médicaux.', 'images/hospitals/hopital1.jpg', 4.2, 14.6928, -17.4467, '{"monday":"08:00 - 18:00","tuesday":"08:00 - 18:00","wednesday":"08:00 - 18:00","thursday":"08:00 - 18:00","friday":"08:00 - 17:00","saturday":"09:00 - 13:00","sunday":"Urgences uniquement"}'),
 (2, 'Centre Hospitalier Universitaire de Fann', 'Route des Almadies, Dakar', '+221 33 869 10 10', 'Centre hospitalier universitaire spécialisé dans la recherche et les soins avancés.', 'images/hospitals/hopital2.jpg', 4.5, 14.7167, -17.4667, '{"monday":"07:30 - 19:00","tuesday":"07:30 - 19:00","wednesday":"07:30 - 19:00","thursday":"07:30 - 19:00","friday":"07:30 - 18:00","saturday":"08:00 - 14:00","sunday":"Urgences uniquement"}'),
@@ -192,10 +198,8 @@ INSERT INTO public.hospitals (id, name, address, phone, description, image_url, 
 (9, 'Polyclinique de la Madeleine', 'Plateau, Dakar', '+221 33 821 21 21', 'Polyclinique privée conventionnée offrant des consultations spécialisées.', 'images/hospitals/hopital9.jpg', 4.4, 14.6681, -17.4303, '{"monday":"07:30 - 19:30","tuesday":"07:30 - 19:30","wednesday":"07:30 - 19:30","thursday":"07:30 - 19:30","friday":"07:30 - 18:30","saturday":"08:00 - 16:00","sunday":"Fermé"}'),
 (10, 'Hôpital Militaire de Ouakam', 'Ouakam, Dakar', '+221 33 860 30 30', 'Hôpital militaire ouvert au public pour certaines consultations.', 'images/hospitals/hopital10.jpg', 4.2, 14.7222, -17.4806, '{"monday":"08:00 - 18:00","tuesday":"08:00 - 18:00","wednesday":"08:00 - 18:00","thursday":"08:00 - 18:00","friday":"08:00 - 17:00","saturday":"09:00 - 13:00","sunday":"Urgences uniquement"}');
 
--- Réinitialiser la séquence
 SELECT setval('hospitals_id_seq', 10);
 
--- Associer les services aux hôpitaux
 INSERT INTO public.hospital_services (hospital_id, service_id)
 SELECT h.id, s.id FROM public.hospitals h, public.services s
 WHERE h.id = 1 AND s.name IN ('Consultation Générale','Urgences','Radiologie','Laboratoire')
@@ -227,16 +231,10 @@ UNION ALL
 SELECT h.id, s.id FROM public.hospitals h, public.services s
 WHERE h.id = 10 AND s.name IN ('Consultation Générale','Urgences','Chirurgie','Imagerie Médicale');
 
-
--- ======================== VUE UTILE ========================
--- Vue qui joint hôpitaux et leurs services (pour le frontend)
 CREATE OR REPLACE VIEW public.hospitals_with_services AS
 SELECT
     h.*,
-    COALESCE(
-        json_agg(s.name ORDER BY s.name) FILTER (WHERE s.name IS NOT NULL),
-        '[]'::json
-    ) AS services
+    COALESCE(json_agg(s.name ORDER BY s.name) FILTER (WHERE s.name IS NOT NULL), '[]'::json) AS services
 FROM public.hospitals h
 LEFT JOIN public.hospital_services hs ON h.id = hs.hospital_id
 LEFT JOIN public.services s ON hs.service_id = s.id

@@ -456,7 +456,8 @@
                     hospital_id: appointmentData.hospital.id,
                     service: appointmentData.service,
                     appointment_date: dateStr,
-                    appointment_time: appointmentData.time
+                    appointment_time: appointmentData.time,
+                    status: 'pending'
                 })
                 .select()
                 .single();

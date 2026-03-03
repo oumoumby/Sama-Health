@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMA Health Pro | Administration</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-page {
+            padding: 2rem 0 5rem;
+            min-height: calc(100vh - 140px);
+            background: var(--bg-page);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .stat-info .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-soft);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .appointments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .appointments-table th {
+            background: var(--bg-page);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .appointments-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-soft);
+            vertical-align: middle;
+            font-size: 0.95rem;
+        }
+
+        .appointments-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .appointments-table tr:hover {
+            background: var(--bg-page);
+        }
+
+        .patient-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .patient-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-confirmed {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-rejected {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .badge-completed {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-approve {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .btn-approve:hover {
+            background: #dcfce3;
+            color: #15803d;
+        }
+
+        .btn-reject {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .btn-reject:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            width: 90%;
+            max-width: 450px;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="container">
+            <a href="admin.html" class="logo">
+                <img src="images/logo.png" alt="SAMA Health" style="height:40px;">
+                <span>SAMA Health Pro</span>
+            </a>
+            <div class="nav-links">
+                <a href="admin.html" class="active">Tableau de Bord</a>
+                <div class="auth-links" style="display:flex; align-items:center; gap:0.75rem; margin-left:1rem;">
+                    <span id="nav-hospital-name"
+                        style="font-weight:700; color:var(--text-main); font-size:0.9rem; background:var(--bg-page); padding:0.4rem 0.8rem; border-radius:20px; border:1px solid var(--border-soft);">...</span>
+                    <button class="btn btn-outline" style="padding:0.4rem 0.75rem; font-size:0.8rem;"
+                        onclick="window.__samaLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-page">
+        <div class="container">
+            <div class="admin-header">
+                <div>
+                    <h1 style="font-size:1.8rem; margin-bottom:0.5rem;">Administration des Rendez-vous</h1>
+                    <p style="color:var(--text-muted);" id="welcome-message">Gérez les consultations de votre
+                        établissement.</p>
+                </div>
+                <button class="btn btn-primary" onclick="loadDashboard()">
+                    <i class="fas fa-sync-alt"></i> Actualiser
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#eff6ff; color:#3b82f6;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Rendez-vous</h3>
+                        <div class="stat-value" id="stat-total">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#f0fdf4; color:#22c55e;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Confirmés</h3>
+                        <div class="stat-value" id="stat-confirmed">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#fffbeb; color:#f59e0b;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>En Attente</h3>
+                        <div class="stat-value" id="stat-pending">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#fef2f2; color:#ef4444;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Rejetés</h3>
+                        <div class="stat-value" id="stat-rejected">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2 style="font-size:1.25rem; margin:0;">Demandes de consultations</h2>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="appointments-table">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Contact</th>
+                                <th>Service & Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-tbody">
+                            <!-- Injected via JS -->
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:3rem; color:var(--text-muted);">
+                                    <i class="fas fa-spinner fa-spin"
+                                        style="font-size:2rem; margin-bottom:1rem; display:block; color:var(--primary);"></i>
+                                    Chargement des données...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Rejection Modal -->
+    <div class="modal-overlay" id="reject-modal">
+        <div class="modal-box">
+            <h3 style="margin:0 0 1rem; color:var(--text-main); font-size:1.25rem;"><i
+                    class="fas fa-exclamation-triangle" style="color:#ef4444; margin-right:0.5rem;"></i>Rejeter le
+                rendez-vous</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:1.5rem;">Veuillez indiquer le motif du
+                rejet. Ce motif sera communiqué au patient sur son espace personnel.</p>
+
+            <div class="form-group">
+                <label class="form-label">Motif du rejet</label>
+                <textarea id="rejection-reason-input" class="form-input" rows="3"
+                    placeholder="Ex: Capacité maximale atteinte ce jour. Veuillez choisir une autre date."
+                    style="resize:none;"></textarea>
+            </div>
+
+            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                <button class="btn btn-outline" style="flex:1;" onclick="closeRejectModal()">Annuler</button>
+                <button class="btn btn-primary" style="flex:1; background:#ef4444; border-color:#ef4444;"
+                    onclick="submitRejection()">Confirmer Rejet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-box">
+            <h3 style="margin:0 0 1rem; color:var(--text-main); font-size:1.25rem;"><i class="fas fa-check-circle"
+                    style="color:#22c55e; margin-right:0.5rem;"></i>Confirmer le rendez-vous</h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:1.5rem;">Êtes-vous sûr de vouloir
+                valider ce rendez-vous ? Le patient sera notifié.</p>
+
+            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                <button class="btn btn-outline" style="flex:1;" onclick="closeConfirmModal()">Annuler</button>
+                <button class="btn btn-primary" style="flex:1; background:#22c55e; border-color:#22c55e;"
+                    onclick="submitConfirmation()">Valider</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="mobile-nav.js"></script>
+    <script type="module">
+        import { supabase, getCurrentUser } from './supabase-auth.js';
+
+        let currentAdmin = null;
+        let adminProfile = null;
+        let targetAppointmentId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentAdmin = await getCurrentUser();
+
+            if (!currentAdmin) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Verify admin role and get profile info
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*, hospitals(name)')
+                .eq('id', currentAdmin.id)
+                .single();
+
+            if (error || !profile || profile.role !== 'admin') {
+                alert("Accès non autorisé. Vous n'êtes pas administrateur d'hôpital.");
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            adminProfile = profile;
+
+            // Setup header
+            document.getElementById('nav-hospital-name').textContent = profile.hospitals?.name || 'Hôpital inconnu';
+            document.getElementById('welcome-message').textContent = `Administrateur: ${profile.full_name}`;
+
+            window.loadDashboard = loadDashboard;
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            if (!adminProfile?.hospital_id) return;
+
+            const tbody = document.getElementById('appointments-tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:3rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i></td></tr>';
+
+            // We need to fetch appointments for this hospital
+            const { data: appointments, error } = await supabase
+                .from('appointments')
+                .select('*')
+                .eq('hospital_id', adminProfile.hospital_id)
+                .order('appointment_date', { ascending: false })
+                .order('appointment_time', { ascending: false });
+
+            if (error) {
+                console.error("Error fetching appointments:", error);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:red;">Erreur de chargement des données.</td></tr>`;
+                return;
+            }
+
+            // Fetch patient profiles separately to avoid FK issues
+            const userIds = [...new Set(appointments.map(a => a.user_id))];
+            let profilesDict = {};
+            if (userIds.length > 0) {
+                const { data: profilesData } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, phone')
+                    .in('id', userIds);
+
+                if (profilesData) {
+                    profilesData.forEach(p => { profilesDict[p.id] = p; });
+                }
+            }
+
+            // Bind profiles to appointments
+            appointments.forEach(a => {
+                a.profiles = profilesDict[a.user_id] || {};
+            });
+
+            // Update stats
+            const total = appointments.length;
+            const confirmed = appointments.filter(a => a.status === 'confirmed').length;
+            const pending = appointments.filter(a => a.status === 'pending').length;
+            const rejected = appointments.filter(a => a.status === 'rejected').length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-confirmed').textContent = confirmed;
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-rejected').textContent = rejected;
+
+            // Render table
+            if (total === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:3rem; color:var(--text-muted);">Aucun rendez-vous pour cet établissement.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            appointments.forEach(app => {
+                const patientName = app.profiles?.full_name || 'Patient inconnu';
+                const patientPhone = app.profiles?.phone || 'Non renseigné';
+                const initial = patientName.charAt(0).toUpperCase();
+
+                // Format date (YYYY-MM-DD to DD/MM/YYYY)
+                const dateParts = app.appointment_date.split('-');
+                const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : app.appointment_date;
+
+                // Status Badge
+                let badgeClass = '';
+                let badgeIcon = '';
+                let badgeText = '';
+
+                switch (app.status) {
+                    case 'pending':
+                        badgeClass = 'badge-pending';
+                        badgeIcon = 'fa-clock';
+                        badgeText = 'En Attente';
+                        break;
+                    case 'confirmed':
+                        badgeClass = 'badge-confirmed';
+                        badgeIcon = 'fa-check-circle';
+                        badgeText = 'Confirmé';
+                        break;
+                    case 'rejected':
+                        badgeClass = 'badge-rejected';
+                        badgeIcon = 'fa-times-circle';
+                        badgeText = 'Rejeté';
+                        break;
+                    case 'completed':
+                        badgeClass = 'badge-completed';
+                        badgeIcon = 'fa-clipboard-check';
+                        badgeText = 'Terminé';
+                        break;
+                    case 'cancelled':
+                        badgeClass = 'badge-rejected';
+                        badgeIcon = 'fa-ban';
+                        badgeText = 'Annulé par patient';
+                        break;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="patient-info">
+                            <div class="patient-avatar">${initial}</div>
+                            <div>
+                                <div style="font-weight:600; color:var(--text-main); margin-bottom:0.2rem;">${patientName}</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);"><i class="fas fa-info-circle"></i> ID: ${app.id.substring(0, 8)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight:500;"><i class="fas fa-phone-alt" style="color:var(--text-muted); font-size:0.8rem; margin-right:5px;"></i> ${patientPhone}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight:600; color:var(--primary); margin-bottom:0.2rem; font-size:0.9rem;">${app.service}</div>
+                        <div style="font-size:0.85rem; color:var(--text-muted);"><i class="far fa-calendar-alt"></i> ${formattedDate} à ${app.appointment_time}</div>
+                    </td>
+                    <td>
+                        <span class="badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${badgeText}</span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            ${(app.status === 'pending' || app.status === 'rejected') ? `
+                                <button class="btn-icon-action btn-approve" title="Valider" onclick="openConfirmModal('${app.id}')">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            ` : ''}
+                            ${(app.status === 'pending' || app.status === 'confirmed') ? `
+                                <button class="btn-icon-action btn-reject" title="Rejeter" onclick="openRejectModal('${app.id}')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Modals ---
+        window.openConfirmModal = function (id) {
+            targetAppointmentId = id;
+            document.getElementById('confirm-modal').classList.add('active');
+        };
+
+        window.closeConfirmModal = function () {
+            targetAppointmentId = null;
+            document.getElementById('confirm-modal').classList.remove('active');
+        };
+
+        window.submitConfirmation = async function () {
+            if (!targetAppointmentId) return;
+
+            const { error } = await supabase
+                .from('appointments')
+                .update({ status: 'confirmed' })
+                .eq('id', targetAppointmentId);
+
+            if (error) {
+                alert("Erreur lors de la confirmation: " + error.message);
+            } else {
+                closeConfirmModal();
+                loadDashboard();
+            }
+        };
+
+        window.openRejectModal = function (id) {
+            targetAppointmentId = id;
+            document.getElementById('rejection-reason-input').value = '';
+            document.getElementById('reject-modal').classList.add('active');
+        };
+
+        window.closeRejectModal = function () {
+            targetAppointmentId = null;
+            document.getElementById('reject-modal').classList.remove('active');
+        };
+
+        window.submitRejection = async function () {
+            if (!targetAppointmentId) return;
+            const reason = document.getElementById('rejection-reason-input').value.trim();
+
+            if (!reason) {
+                alert("Veuillez indiquer un motif de rejet.");
+                return;
+            }
+
+            const { error } = await supabase
+                .from('appointments')
+                .update({ status: 'rejected', rejection_reason: reason })
+                .eq('id', targetAppointmentId);
+
+            if (error) {
+                alert("Erreur lors du rejet: " + error.message);
+            } else {
+                closeRejectModal();
+                loadDashboard();
+            }
+        };
+
+    </script>
+</body>
+
+</html>

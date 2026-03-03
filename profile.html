@@ -466,24 +466,38 @@
             appointments.forEach(appt => {
                 const d = new Date(appt.appointment_date);
                 const dateStr = d.toLocaleDateString('fr', { weekday: 'short', day: 'numeric', month: 'short' });
-                const isCancelled = appt.status === 'cancelled';
-                const borderColor = isCancelled ? '#ef4444' : 'var(--primary)';
+
+                let bColor = '#f59e0b', bBg = '#fffbeb', bIcon = 'fa-clock', bText = 'En Attente';
+                if (appt.status === 'confirmed') { bColor = '#16a34a'; bBg = '#f0fdf4'; bIcon = 'fa-check'; bText = 'Confirmé'; }
+                if (appt.status === 'rejected') { bColor = '#dc2626'; bBg = '#fef2f2'; bIcon = 'fa-times'; bText = 'Rejeté'; }
+                if (appt.status === 'completed') { bColor = '#2563eb'; bBg = '#eff6ff'; bIcon = 'fa-check-double'; bText = 'Terminé'; }
+
+                const borderColor = appt.status === 'rejected' ? '#dc2626' : (appt.status === 'pending' ? '#f59e0b' : 'var(--primary)');
+
                 const div = document.createElement('div');
                 div.id = `appt-${appt.id}`;
-                div.style.cssText = `padding:1rem; margin-bottom:0.75rem; border:1px solid var(--border-soft); border-left:4px solid ${borderColor}; border-radius:var(--radius-sm); transition: opacity 0.3s, transform 0.3s;`;
+                div.style.cssText = `padding:1.25rem; margin-bottom:1rem; border:1px solid var(--border-soft); border-left:4px solid ${borderColor}; border-radius:var(--radius-sm); transition: opacity 0.3s, transform 0.3s; background:white;`;
                 div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-weight:700; font-size:0.9rem;">${appt.service}</div>
-                            <div style="font-size:0.8rem; color:var(--text-muted);">${appt.hospitals?.name || '-'}</div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <div style="text-align:right;">
-                                <div style="font-weight:600; color:var(--primary); font-size:0.85rem;">${dateStr}</div>
-                                <div style="font-size:0.8rem; color:var(--text-muted);">${appt.appointment_time || ''}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+                        <div style="flex:1; min-width:250px;">
+                            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+                                <div style="font-weight:700; font-size:1.05rem; color:var(--text-main);">${appt.service}</div>
+                                <span style="font-size:0.75rem; font-weight:600; padding:3px 10px; border-radius:12px; background:${bBg}; color:${bColor};"><i class="fas ${bIcon}"></i> ${bText}</span>
                             </div>
-                            <button class="btn-delete-rdv" title="Supprimer ce rendez-vous" onclick="openDeleteModal('${appt.id}')">
-                                <i class="fas fa-trash-alt"></i>
+                            <div style="font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; gap:5px;"><i class="fas fa-hospital"></i> ${appt.hospitals?.name || '-'}</div>
+                            
+                            ${appt.status === 'rejected' && appt.rejection_reason ? `
+                            <div style="margin-top:0.75rem; font-size:0.85rem; color:#dc2626; background:#fef2f2; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid #fecaca;">
+                                <i class="fas fa-info-circle"></i> <strong>Motif du rejet:</strong> ${appt.rejection_reason}
+                            </div>` : ''}
+                        </div>
+                        <div style="display:flex; align-items:center; gap:1rem;">
+                            <div style="text-align:right;">
+                                <div style="font-weight:700; color:var(--primary); font-size:0.95rem;"><i class="far fa-calendar-alt"></i> ${dateStr}</div>
+                                <div style="font-size:0.85rem; color:var(--text-muted);"><i class="far fa-clock"></i> ${appt.appointment_time || ''}</div>
+                            </div>
+                            <button class="btn btn-outline" style="padding:0.4rem 0.6rem; color:#ef4444; border-color:#fca5a5;" title="Annuler le RDV" onclick="openDeleteModal('${appt.id}')">
+                                <i class="fas fa-times"></i>
                             </button>
                         </div>
                     </div>
