@@ -9,18 +9,23 @@ export async function getCurrentUser() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
+    // Fetch the profile from the database
     const { data: profile } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
+    // Use profile data if available, otherwise fallback to user metadata 
+    // (useful immediately after signup before the trigger finishes)
+    const meta = user.user_metadata || {};
+
     return {
         id: user.id,
         email: user.email,
-        fullName: profile?.full_name || '',
-        phone: profile?.phone || '',
-        ageRange: profile?.age_range || '',
+        fullName: profile?.full_name || meta.full_name || '',
+        phone: profile?.phone || meta.phone || '',
+        ageRange: profile?.age_range || meta.age_range || '',
         ...profile
     };
 }

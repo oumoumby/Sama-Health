@@ -529,8 +529,13 @@
 
                 const { error } = await supabase
                     .from('profiles')
-                    .update({ full_name: newFullName, phone: newPhone, age_range: newAge })
-                    .eq('id', user.id);
+                    .upsert({
+                        id: user.id,
+                        full_name: newFullName,
+                        phone: newPhone,
+                        age_range: newAge,
+                        role: user.role || 'patient'
+                    });
 
                 if (error) {
                     alert('Erreur : ' + error.message);

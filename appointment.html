@@ -449,6 +449,16 @@
             const dateObj = new Date(appointmentData.date);
             const dateStr = dateObj.toISOString().split('T')[0];
 
+            // Guarantee profile exists before creating appointment (Fix for "Patient Inconnu")
+            const meta = user.user_metadata || {};
+            await supabase.from('profiles').upsert({
+                id: user.id,
+                full_name: meta.full_name || 'Patient',
+                phone: meta.phone || '',
+                age_range: meta.age_range || '',
+                role: meta.role || 'patient'
+            });
+
             const { data, error } = await supabase
                 .from('appointments')
                 .insert({
