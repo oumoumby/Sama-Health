@@ -838,6 +838,50 @@ h3 {
     }
 }
 
+/* ======================== HAMBURGER BUTTON ======================== */
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    z-index: 1001;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+}
+
+.hamburger-btn:hover {
+    background: var(--primary-light);
+}
+
+.hamburger-btn .bar {
+    display: block;
+    width: 22px;
+    height: 2.5px;
+    background: var(--text-main);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* Animated X when open */
+.hamburger-btn.active .bar:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn.active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-btn.active .bar:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
 /* ======================== RESPONSIVE ======================== */
 @media (max-width: 1024px) {
     .hero .container {
@@ -873,24 +917,181 @@ h3 {
 }
 
 @media (max-width: 768px) {
-    .nav-links {
-        display: none;
+    /* Show hamburger button */
+    .hamburger-btn {
+        display: flex;
     }
 
+    /* Mobile nav-links — slide-down menu */
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem 1.5rem 1.5rem;
+        border-top: 1px solid var(--border-soft);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        gap: 0;
+        z-index: 999;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .nav-links.nav-open {
+        display: flex;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .nav-links a:not(.btn) {
+        padding: 0.85rem 0;
+        border-bottom: 1px solid var(--border-soft);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .nav-links a:not(.btn):last-of-type {
+        border-bottom: none;
+    }
+
+    /* Auth links in mobile menu */
+    .nav-links .auth-links {
+        flex-direction: column !important;
+        margin-left: 0 !important;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border-soft);
+        gap: 0.5rem !important;
+    }
+
+    .nav-links .auth-links .btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Make navbar position relative for dropdown */
+    .navbar {
+        position: sticky;
+    }
+
+    .navbar .container {
+        position: relative;
+    }
+
+    /* Footer */
     .footer-grid {
         grid-template-columns: 1fr;
     }
 
+    /* Stats */
     .stats-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
 
+    /* Gradient header */
     .gradient-header {
         padding: 2rem 0;
     }
 
     .gradient-header h1 {
         font-size: 1.8rem;
+    }
+
+    /* Hero */
+    .hero {
+        padding: 4rem 0 5rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Welcome banner (dashboard) */
+    .welcome-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    /* Quick actions grid */
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Dashboard grid */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Profile layout */
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar-card {
+        position: static;
+    }
+
+    /* CTA banner */
+    .cta-banner {
+        padding: 3rem 0;
+    }
+
+    /* Form card */
+    .form-card {
+        padding: 1.25rem;
+    }
+
+    /* Features / cards grid */
+    .features-grid,
+    .hospitals-grid,
+    .specialties-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    .hero {
+        padding: 3rem 0 4rem;
+    }
+
+    .hero-content h1 {
+        font-size: 2rem;
     }
 }

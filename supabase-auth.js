@@ -44,6 +44,8 @@ export async function initAuthNavbar(activePage) {
                 <button class="btn btn-outline" style="padding:0.4rem 0.75rem; font-size:0.8rem;" onclick="window.__samaLogout()"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         `;
+        // Notify mobile-nav.js to re-inject hamburger button
+        document.dispatchEvent(new Event('navbarUpdated'));
     }
 
     return user;

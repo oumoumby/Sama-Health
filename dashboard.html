@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAMA Health | Mon Espace</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -127,6 +128,124 @@
             font-size: 0.85rem;
             cursor: pointer;
             text-decoration: none;
+        }
+
+        /* Delete button */
+        .btn-delete-rdv {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-size: 0.85rem;
+        }
+
+        .btn-delete-rdv:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        /* Confirmation modal */
+        .confirm-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+
+        .confirm-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .confirm-modal {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.25s;
+        }
+
+        .confirm-modal-overlay.active .confirm-modal {
+            transform: scale(1);
+        }
+
+        .confirm-modal h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.15rem;
+        }
+
+        .confirm-modal p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-modal .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .confirm-modal .modal-actions button {
+            flex: 1;
+            padding: 0.7rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .confirm-modal .btn-cancel-modal {
+            background: var(--bg-page);
+            color: var(--text-body);
+        }
+
+        .confirm-modal .btn-cancel-modal:hover {
+            background: var(--border-soft);
+        }
+
+        .confirm-modal .btn-confirm-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .confirm-modal .btn-confirm-delete:hover {
+            background: #dc2626;
+        }
+
+        /* Toast notification */
+        .toast-notif {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1a1a2e;
+            color: white;
+            padding: 0.85rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+
+        .toast-notif.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
@@ -251,6 +370,23 @@
         </div>
     </main>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="confirm-modal-overlay" id="delete-modal">
+        <div class="confirm-modal">
+            <h3><i class="fas fa-exclamation-triangle" style="color:#ef4444; margin-right:0.4rem;"></i> Supprimer ce
+                rendez-vous ?</h3>
+            <p>Cette action est irréversible. Le rendez-vous sera définitivement supprimé.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel-modal" onclick="closeDeleteModal()">Annuler</button>
+                <button class="btn-confirm-delete" id="btn-confirm-del"><i class="fas fa-trash-alt"
+                        style="margin-right:0.3rem;"></i> Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-notif" id="toast"></div>
+
     <footer class="footer" style="margin-top:0;">
         <div class="container">
             <div class="footer-bottom" style="border:none; padding-top:0;">
@@ -259,6 +395,7 @@
         </div>
     </footer>
 
+    <script src="mobile-nav.js"></script>
     <script type="module">
         import { initAuthNavbar, getCurrentUser, supabase } from './supabase-auth.js';
 
@@ -287,18 +424,72 @@
                 const d = new Date(appt.appointment_date);
                 const dateStr = d.toLocaleDateString('fr', { day: 'numeric', month: 'short' });
                 container.innerHTML += `
-                    <div class="rdv-item">
+                    <div class="rdv-item" id="appt-${appt.id}" style="transition: opacity 0.3s, transform 0.3s;">
                         <div>
                             <div style="font-weight:700; font-size:0.9rem;">${appt.service}</div>
                             <div style="font-size:0.8rem; color:var(--text-muted);">${appt.hospitals?.name || '-'}</div>
                         </div>
-                        <div style="text-align:right;">
-                            <div style="font-weight:600; color:var(--primary); font-size:0.85rem;">${dateStr}</div>
-                            <div style="font-size:0.8rem; color:var(--text-muted);">${appt.appointment_time || ''}</div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <div style="text-align:right;">
+                                <div style="font-weight:600; color:var(--primary); font-size:0.85rem;">${dateStr}</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">${appt.appointment_time || ''}</div>
+                            </div>
+                            <button class="btn-delete-rdv" title="Supprimer" onclick="openDeleteModal('${appt.id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </div>
                     </div>
                 `;
             });
+        }
+
+        // ---- Delete appointment logic ----
+        let pendingDeleteId = null;
+
+        window.openDeleteModal = function (id) {
+            pendingDeleteId = id;
+            document.getElementById('delete-modal').classList.add('active');
+        };
+
+        window.closeDeleteModal = function () {
+            pendingDeleteId = null;
+            document.getElementById('delete-modal').classList.remove('active');
+        };
+
+        document.getElementById('btn-confirm-del').addEventListener('click', async () => {
+            if (!pendingDeleteId) return;
+            const id = pendingDeleteId;
+            closeDeleteModal();
+
+            const el = document.getElementById(`appt-${id}`);
+            if (el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(30px)';
+            }
+
+            const { error } = await supabase
+                .from('appointments')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                showToast('Erreur lors de la suppression');
+                if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
+            } else {
+                showToast('Rendez-vous supprimé ✓');
+                setTimeout(() => window.location.reload(), 400);
+            }
+        });
+
+        document.getElementById('delete-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeDeleteModal();
+        });
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
         }
 
         window.addEventListener('scroll', () => {
