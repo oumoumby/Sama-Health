@@ -25,6 +25,73 @@
             gap: 1rem;
         }
 
+        .admin-nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .admin-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .admin-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .specialty-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border-soft);
+            background: white;
+            color: var(--text-muted);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
         /* Stats Cards */
         .stats-cards {
             display: grid;
@@ -305,8 +372,15 @@
                 </button>
             </div>
 
-            <!-- Stats -->
-            <div class="stats-cards">
+            <!-- Navigation Tabs -->
+            <div class="admin-nav-tabs">
+                <div class="admin-tab active" id="tab-appointments-btn" onclick="switchTab('appointments')">Rendez-vous</div>
+                <div class="admin-tab" id="tab-settings-btn" onclick="switchTab('settings')">Paramètres & Horaires</div>
+            </div>
+
+            <div id="appointments-tab" class="tab-content active">
+                <!-- Stats -->
+                <div class="stats-cards">
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#eff6ff; color:#3b82f6;">
                         <i class="fas fa-calendar-check"></i>
@@ -350,6 +424,14 @@
                 <div class="table-header">
                     <h2 style="font-size:1.25rem; margin:0;">Demandes de consultations</h2>
                 </div>
+                <div style="padding: 1rem 1.5rem; background: #f8fafc; border-bottom: 1px solid var(--border-soft);">
+                    <div class="filter-bar" id="status-filters">
+                        <button class="filter-btn active" onclick="filterByStatus('all')">Tous</button>
+                        <button class="filter-btn" onclick="filterByStatus('pending')">En Attente</button>
+                        <button class="filter-btn" onclick="filterByStatus('confirmed')">Confirmés</button>
+                        <button class="filter-btn" onclick="filterByStatus('rejected')">Rejetés</button>
+                    </div>
+                </div>
                 <div style="overflow-x:auto;">
                     <table class="appointments-table">
                         <thead>
@@ -372,6 +454,21 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+            </div>
+
+            <div id="settings-tab" class="tab-content">
+                <div class="table-container" style="padding:2rem;">
+                    <h2 style="font-size:1.4rem; margin-bottom:1.5rem;"><i class="fas fa-clock" style="margin-right:0.75rem; color:var(--primary);"></i>Horaires et Capacités par Spécialité</h2>
+                    <p style="color:var(--text-muted); margin-bottom:2rem;">Définissez les plages horaires et le nombre maximum de rendez-vous quotidiens pour chaque service de votre hôpital.</p>
+                    
+                    <div id="specialties-settings-grid" class="settings-grid">
+                        <!-- Injected via JS -->
+                        <div style="text-align:center; padding:3rem; grid-column: 1 / -1;">
+                            <i class="fas fa-sync fa-spin" style="font-size:2rem; color:var(--primary);"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -424,6 +521,8 @@
         let currentAdmin = null;
         let adminProfile = null;
         let targetAppointmentId = null;
+        let allAppointments = [];
+        let currentStatusFilter = 'all';
 
         document.addEventListener('DOMContentLoaded', async () => {
             currentAdmin = await getCurrentUser();
@@ -453,8 +552,29 @@
             document.getElementById('welcome-message').textContent = `Administrateur: ${profile.full_name}`;
 
             window.loadDashboard = loadDashboard;
+            window.switchTab = switchTab;
+            window.filterByStatus = filterByStatus;
+            window.saveSpecialtySettings = saveSpecialtySettings;
+
             loadDashboard();
+            loadSpecialtySettings();
         });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+            document.getElementById(`tab-${tabId}-btn`).classList.add('active');
+        }
+
+        function filterByStatus(status) {
+            currentStatusFilter = status;
+            document.querySelectorAll('#status-filters .filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(status === 'all' ? 'tous' : status === 'pending' ? 'attente' : status === 'confirmed' ? 'confirm' : 'rejet'));
+            });
+            renderAppointmentsTable();
+        }
 
         async function loadDashboard() {
             if (!adminProfile?.hospital_id) return;
@@ -476,6 +596,8 @@
                 return;
             }
 
+            allAppointments = appointments;
+
             // Fetch patient profiles separately to avoid FK issues
             const userIds = [...new Set(appointments.map(a => a.user_id))];
             let profilesDict = {};
@@ -491,29 +613,40 @@
             }
 
             // Bind profiles to appointments
-            appointments.forEach(a => {
+            allAppointments.forEach(a => {
                 a.profiles = profilesDict[a.user_id] || {};
             });
 
             // Update stats
-            const total = appointments.length;
-            const confirmed = appointments.filter(a => a.status === 'confirmed').length;
-            const pending = appointments.filter(a => a.status === 'pending').length;
-            const rejected = appointments.filter(a => a.status === 'rejected').length;
+            updateStats();
+            renderAppointmentsTable();
+        }
+
+        function updateStats() {
+            const total = allAppointments.length;
+            const confirmed = allAppointments.filter(a => a.status === 'confirmed').length;
+            const pending = allAppointments.filter(a => a.status === 'pending').length;
+            const rejected = allAppointments.filter(a => a.status === 'rejected').length;
 
             document.getElementById('stat-total').textContent = total;
             document.getElementById('stat-confirmed').textContent = confirmed;
             document.getElementById('stat-pending').textContent = pending;
             document.getElementById('stat-rejected').textContent = rejected;
+        }
 
-            // Render table
-            if (total === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:3rem; color:var(--text-muted);">Aucun rendez-vous pour cet établissement.</td></tr>`;
+        function renderAppointmentsTable() {
+            const tbody = document.getElementById('appointments-tbody');
+            const filtered = currentStatusFilter === 'all' 
+                ? allAppointments 
+                : allAppointments.filter(a => a.status === currentStatusFilter);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:3rem; color:var(--text-muted);">Aucun rendez-vous trouvé.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = '';
-            appointments.forEach(app => {
+            filtered.forEach(app => {
                 const patientName = app.profiles?.full_name || 'Patient inconnu';
                 const patientPhone = app.profiles?.phone || 'Non renseigné';
                 const initial = patientName.charAt(0).toUpperCase();
@@ -563,6 +696,7 @@
                             <div>
                                 <div style="font-weight:600; color:var(--text-main); margin-bottom:0.2rem;">${patientName}</div>
                                 <div style="font-size:0.8rem; color:var(--text-muted);"><i class="fas fa-info-circle"></i> ID: ${app.id.substring(0, 8)}</div>
+                                ${app.rejection_reason ? `<div style="font-size:0.75rem; color:#dc2626; margin-top:0.2rem;"><i class="fas fa-comment-slash"></i> ${app.rejection_reason}</div>` : ''}
                             </div>
                         </div>
                     </td>
@@ -593,6 +727,105 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        async function loadSpecialtySettings() {
+            if (!adminProfile?.hospital_id) return;
+
+            const grid = document.getElementById('specialties-settings-grid');
+            
+            // 1. Get hospital services (from hospitals_with_services view or join)
+            const { data: hospData } = await supabase
+                .from('hospitals_with_services')
+                .select('services')
+                .eq('id', adminProfile.hospital_id)
+                .single();
+
+            const services = hospData?.services || [];
+
+            // 2. Get existing settings
+            const { data: settings } = await supabase
+                .from('specialty_settings')
+                .select('*')
+                .eq('hospital_id', adminProfile.hospital_id);
+
+            const settingsMap = {};
+            if (settings) {
+                settings.forEach(s => { settingsMap[s.service_name] = s; });
+            }
+
+            // 3. Render
+            grid.innerHTML = '';
+            services.forEach(sName => {
+                const s = settingsMap[sName] || { 
+                    start_time: '08:00', end_time: '17:00', 
+                    max_appointments_per_day: 20, slot_duration: 30 
+                };
+
+                const card = document.createElement('div');
+                card.className = 'specialty-card';
+                card.innerHTML = `
+                    <h3 style="margin-bottom:1.25rem; font-size:1.1rem; color:var(--primary); display:flex; align-items:center;">
+                        <i class="fas fa-stethoscope" style="margin-right:0.5rem; font-size:0.9rem;"></i> ${sName}
+                    </h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:0.8rem;">Début</label>
+                            <input type="time" class="form-input" id="start-${sName}" value="${s.start_time.substring(0, 5)}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:0.8rem;">Fin</label>
+                            <input type="time" class="form-input" id="end-${sName}" value="${s.end_time.substring(0, 5)}">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:0.75rem;">
+                        <label class="form-label" style="font-size:0.8rem;">Max RDV / jour</label>
+                        <input type="number" class="form-input" id="limit-${sName}" value="${s.max_appointments_per_day}" min="1">
+                    </div>
+                    <div class="form-group" style="margin-top:0.75rem;">
+                        <label class="form-label" style="font-size:0.8rem;">Durée créneau (min)</label>
+                        <select class="form-input" id="duration-${sName}">
+                            <option value="15" ${s.slot_duration == 15 ? 'selected' : ''}>15 min</option>
+                            <option value="20" ${s.slot_duration == 20 ? 'selected' : ''}>20 min</option>
+                            <option value="30" ${s.slot_duration == 30 ? 'selected' : ''}>30 min</option>
+                            <option value="45" ${s.slot_duration == 45 ? 'selected' : ''}>45 min</option>
+                            <option value="60" ${s.slot_duration == 60 ? 'selected' : ''}>1 heure</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:1rem; padding:0.6rem; font-size:0.85rem;" 
+                        onclick="saveSpecialtySettings('${sName}')">Enregistrer</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function saveSpecialtySettings(serviceName) {
+            const startTime = document.getElementById(`start-${serviceName}`).value;
+            const endTime = document.getElementById(`end-${serviceName}`).value;
+            const limit = parseInt(document.getElementById(`limit-${serviceName}`).value);
+            const duration = parseInt(document.getElementById(`duration-${serviceName}`).value);
+
+            if (!startTime || !endTime || isNaN(limit) || limit < 1) {
+                alert("Veuillez remplir correctement tous les champs.");
+                return;
+            }
+
+            const { error } = await supabase
+                .from('specialty_settings')
+                .upsert({
+                    hospital_id: adminProfile.hospital_id,
+                    service_name: serviceName,
+                    start_time: startTime + ':00',
+                    end_time: endTime + ':00',
+                    max_appointments_per_day: limit,
+                    slot_duration: duration
+                }, { onConflict: 'hospital_id, service_name' });
+
+            if (error) {
+                alert("Erreur lors de l'enregistrement: " + error.message);
+            } else {
+                alert(`Paramètres pour "${serviceName}" mis à jour avec succès !`);
+            }
         }
 
         // --- Modals ---

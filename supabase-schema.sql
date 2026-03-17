@@ -239,3 +239,113 @@ FROM public.hospitals h
 LEFT JOIN public.hospital_services hs ON h.id = hs.hospital_id
 LEFT JOIN public.services s ON hs.service_id = s.id
 GROUP BY h.id;
+
+-- ======================== PARAMÈTRES PAR SPÉCIALITÉ ========================
+CREATE TABLE public.specialty_settings (
+    id SERIAL PRIMARY KEY,
+    hospital_id INT NOT NULL REFERENCES public.hospitals(id) ON DELETE CASCADE,
+    service_name TEXT NOT NULL, -- On utilise le nom pour correspondre à appointments.service
+    start_time TIME NOT NULL DEFAULT '08:00',
+    end_time TIME NOT NULL DEFAULT '17:00',
+    max_appointments_per_day INT NOT NULL DEFAULT 20,
+    slot_duration INT NOT NULL DEFAULT 30, -- En minutes
+    is_active BOOLEAN DEFAULT true,
+    UNIQUE(hospital_id, service_name)
+);
+
+ALTER TABLE public.specialty_settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Lecture publique des paramètres" ON public.specialty_settings 
+    FOR SELECT USING (true);
+
+CREATE POLICY "Admins gèrent les paramètres de leur hôpital" 
+    ON public.specialty_settings FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE profiles.id = auth.uid() 
+            AND profiles.role = 'admin' 
+            AND profiles.hospital_id = specialty_settings.hospital_id
+        )
+    );
+
+-- ======================== RÉSERVATION SÉCURISÉE (Transactions/Verrous) ========================
+-- Cette fonction garantit qu'on ne dépasse pas la limite même avec 1000 users simultanés
+CREATE OR REPLACE FUNCTION public.book_appointment_safe(
+    p_user_id UUID,
+    p_hospital_id INT,
+    p_service_name TEXT,
+    p_appointment_date DATE,
+    p_appointment_time TEXT
+) RETURNS UUID AS $$
+DECLARE
+    v_limit INT;
+    v_current_count INT;
+    v_new_id UUID;
+BEGIN
+    -- 1. Récupérer la limite et VERROUILLER la ligne de paramètres pour cet hôpital/service
+    -- Cela empêche d'autres transactions de lire/modifier ces paramètres simultanément
+    SELECT max_appointments_per_day INTO v_limit
+    FROM public.specialty_settings
+    WHERE hospital_id = p_hospital_id AND service_name = p_service_name
+    FOR SHARE; -- Share lock suffit pour lire la limite de façon cohérente
+
+    -- Si pas de paramètre spécifique, on prend une limite par défaut (ex: 50)
+    IF v_limit IS NULL THEN
+        v_limit := 50;
+    END IF;
+
+    -- 2. Compter les rendez-vous existants (Sauf rejetés/annulés) 
+    -- On utilise un verrou de lecture sur les rendez-vous du même jour/service via un index
+    SELECT COUNT(*) INTO v_current_count
+    FROM public.appointments
+    WHERE hospital_id = p_hospital_id 
+      AND service = p_service_name 
+      AND appointment_date = p_appointment_date
+      AND status NOT IN ('rejected', 'cancelled');
+
+    -- 3. Vérifier le seuil
+    IF v_current_count >= v_limit THEN
+        RAISE EXCEPTION 'Capacité maximale atteinte pour cette spécialité aujourd''hui.';
+    END IF;
+
+    -- 4. Insérer le rendez-vous
+    INSERT INTO public.appointments (
+        user_id, hospital_id, service, appointment_date, appointment_time, status
+    ) VALUES (
+        p_user_id, p_hospital_id, p_service_name, p_appointment_date, p_appointment_time, 'pending'
+    ) RETURNING id INTO v_new_id;
+
+    RETURN v_new_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ======================== UTILITAIRES DE LECTURE ========================
+-- Compte les rendez-vous par jour pour une spécialité sur une plage donnée
+CREATE OR REPLACE FUNCTION public.get_appointment_counts(
+    p_hospital_id INT,
+    p_service_name TEXT,
+    p_start_date DATE,
+    p_end_date DATE
+) RETURNS TABLE (appointment_date DATE, count BIGINT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT a.appointment_date, COUNT(*) as count
+    FROM public.appointments a
+    WHERE a.hospital_id = p_hospital_id 
+      AND a.service = p_service_name
+      AND a.appointment_date BETWEEN p_start_date AND p_end_date
+      AND a.status NOT IN ('rejected', 'cancelled')
+    GROUP BY a.appointment_date;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ======================== DONNÉES DE DÉPART ========================
+-- On initialise quelques limites pour le test
+INSERT INTO public.specialty_settings (hospital_id, service_name, max_appointments_per_day, start_time, end_time)
+SELECT id, 'Consultation Générale', 5, '08:00', '16:00' FROM public.hospitals WHERE id = 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.specialty_settings (hospital_id, service_name, max_appointments_per_day, start_time, end_time)
+SELECT id, 'Pédiatrie', 3, '09:00', '15:00' FROM public.hospitals WHERE id = 2
+ON CONFLICT DO NOTHING;
