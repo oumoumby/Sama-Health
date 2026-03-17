@@ -6,12 +6,15 @@
 -- Nettoyage forcé (permet de repartir de zéro sans erreur)
 DROP VIEW IF EXISTS public.hospitals_with_services CASCADE;
 DROP TABLE IF EXISTS public.appointments CASCADE;
+DROP TABLE IF EXISTS public.specialty_settings CASCADE;
 DROP TABLE IF EXISTS public.hospital_services CASCADE;
 DROP TABLE IF EXISTS public.services CASCADE;
 DROP TABLE IF EXISTS public.hospitals CASCADE;
 DROP TABLE IF EXISTS public.profiles CASCADE;
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users CASCADE;
 DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS public.book_appointment_safe(UUID, INT, TEXT, DATE, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS public.get_appointment_counts(INT, TEXT, DATE, DATE) CASCADE;
 
 -- ======================== HÔPITAUX ========================
 CREATE TABLE public.hospitals (
