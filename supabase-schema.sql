@@ -259,11 +259,8 @@ CREATE TABLE public.specialty_settings (
 );
 
 -- Index unique pour éviter les doublons (Hôpital + Service + Date ou NULL)
-CREATE UNIQUE INDEX idx_specialty_unique_default ON public.specialty_settings (hospital_id, service_name) 
-WHERE specific_date IS NULL;
-
-CREATE UNIQUE INDEX idx_specialty_unique_date ON public.specialty_settings (hospital_id, service_name, specific_date) 
-WHERE specific_date IS NOT NULL;
+-- Utilisation de NULLS NOT DISTINCT pour que multiple NULL soient considérés comme identiques
+CREATE UNIQUE INDEX idx_specialty_unique_settings ON public.specialty_settings (hospital_id, service_name, specific_date) NULLS NOT DISTINCT;
 
 ALTER TABLE public.specialty_settings ENABLE ROW LEVEL SECURITY;
 

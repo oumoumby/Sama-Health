@@ -1097,7 +1097,7 @@
                     end_time: endTime + ':00',
                     max_appointments_per_day: limit,
                     slot_duration: duration
-                }, { onConflict: 'hospital_id, service_name' });
+                }, { onConflict: 'hospital_id, service_name, specific_date' });
 
             if (error) alert("Erreur: " + error.message);
             else {
