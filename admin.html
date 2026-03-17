@@ -66,6 +66,87 @@
             border-radius: var(--radius-md);
             border: 1px solid var(--border-soft);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Admin Mini-Calendar Styles */
+        .admin-calendar-container {
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .admin-calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: white;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .admin-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            font-size: 0.75rem;
+        }
+
+        .admin-calendar-day-label {
+            padding: 0.3rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: white;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .admin-calendar-day {
+            padding: 0.5rem 0;
+            text-align: center;
+            cursor: pointer;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            background: white;
+            transition: var(--transition);
+        }
+
+        .admin-calendar-day:nth-child(7n) { border-right: none; }
+
+        .admin-calendar-day:hover:not(.disabled) {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .admin-calendar-day.selected {
+            background: var(--primary) !important;
+            color: white !important;
+        }
+
+        .admin-calendar-day.blocked {
+            background: #fee2e2 !important;
+            color: #dc2626 !important;
+            text-decoration: line-through;
+        }
+
+        .admin-calendar-day.custom {
+            background: #fef3c7 !important;
+            color: #d97706 !important;
+            font-weight: 700;
+        }
+
+        .admin-calendar-day.disabled {
+            color: #cbd5e1;
+            cursor: default;
+            background: #f8fafc;
+        }
+
+        .admin-calendar-day.today {
+            box-shadow: inset 0 0 0 1px var(--primary);
         }
 
         .filter-bar {
@@ -460,13 +541,14 @@
 
             <div id="settings-tab" class="tab-content">
                 <div class="table-container" style="padding:2rem;">
-                    <h2 style="font-size:1.4rem; margin-bottom:1.5rem;"><i class="fas fa-clock" style="margin-right:0.75rem; color:var(--primary);"></i>Horaires et Capacités par Spécialité</h2>
-                    <p style="color:var(--text-muted); margin-bottom:2rem;">Définissez les plages horaires et le nombre maximum de rendez-vous quotidiens pour chaque service de votre hôpital.</p>
+                    <h2 style="font-size:1.4rem; margin-bottom:1rem;"><i class="fas fa-calendar-alt" style="margin-right:0.75rem; color:var(--primary);"></i>Gestion du Calendrier & Horaires</h2>
+                    <p style="color:var(--text-muted); margin-bottom:2rem;">Sélectionnez une spécialité et gérez son planning. Vous pouvez définir des horaires par défaut ou cliquer sur une date précise pour bloquer la journée ou modifier les horaires de ce jour-là.</p>
                     
                     <div id="specialties-settings-grid" class="settings-grid">
                         <!-- Injected via JS -->
-                        <div style="text-align:center; padding:3rem; grid-column: 1 / -1;">
-                            <i class="fas fa-sync fa-spin" style="font-size:2rem; color:var(--primary);"></i>
+                        <div style="text-align:center; padding:3rem; grid-column: 1 / -1; color:var(--text-muted);">
+                            <i class="fas fa-sync fa-spin" style="font-size:2rem; color:var(--primary); margin-bottom:1rem; display:block;"></i>
+                            Chargement des paramètres...
                         </div>
                     </div>
                 </div>
@@ -513,6 +595,67 @@
             </div>
         </div>
     </div>
+
+    <!-- Day Settings Modal -->
+    <div class="modal-overlay" id="day-settings-modal">
+        <div class="modal-box" style="max-width: 500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 id="modal-day-title" style="margin:0; font-size:1.2rem;">Réglages du 20 Mars 2026</h3>
+                <span id="modal-specialty-badge" class="badge badge-completed">Pédiatrie</span>
+            </div>
+
+            <div style="background:#f8fafc; padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border-soft); margin-bottom:1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:700; font-size:0.95rem;">État de la journée</div>
+                        <div id="day-status-text" style="font-size:0.8rem; color:var(--text-muted);">Ouvert aux réservations</div>
+                    </div>
+                    <label class="switch" style="position:relative; display:inline-block; width:50px; height:24px;">
+                        <input type="checkbox" id="block-day-toggle" onchange="toggleDayBlock(this.checked)" style="opacity:0; width:0; height:0;">
+                        <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:34px;"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="day-form-container">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                    <div>
+                        <label class="form-label">Heure Début</label>
+                        <input type="time" id="day-start-time" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Heure Fin</label>
+                        <input type="time" id="day-end-time" class="form-input">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div>
+                        <label class="form-label">Limite RDV / jour</label>
+                        <input type="number" id="day-limit" class="form-input" min="0">
+                    </div>
+                    <div>
+                        <label class="form-label">Durée créneau (min)</label>
+                        <input type="number" id="day-duration" class="form-input" min="5" readonly style="background:#f1f5f9;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:1rem; margin-top:2rem;">
+                <button class="btn btn-outline" style="flex:1;" onclick="closeDaySettingsModal()">Annuler</button>
+                <button class="btn btn-primary" style="flex:1;" id="save-day-btn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .switch input:checked + .slider { background-color: #ef4444; }
+        .switch input:checked + .slider:before { transform: translateX(26px); }
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+    </style>
 
     <script src="mobile-nav.js"></script>
     <script type="module">
@@ -729,12 +872,16 @@
             });
         }
 
+        let calendarViews = {}; // { serviceName: Date }
+        let allSettings = [];
+        let selectedDayInfo = { service: '', date: '' };
+
         async function loadSpecialtySettings() {
             if (!adminProfile?.hospital_id) return;
 
             const grid = document.getElementById('specialties-settings-grid');
             
-            // 1. Get hospital services (from hospitals_with_services view or join)
+            // 1. Get hospital services
             const { data: hospData } = await supabase
                 .from('hospitals_with_services')
                 .select('services')
@@ -743,21 +890,20 @@
 
             const services = hospData?.services || [];
 
-            // 2. Get existing settings
+            // 2. Get all settings (defaults and specific dates)
             const { data: settings } = await supabase
                 .from('specialty_settings')
                 .select('*')
                 .eq('hospital_id', adminProfile.hospital_id);
 
-            const settingsMap = {};
-            if (settings) {
-                settings.forEach(s => { settingsMap[s.service_name] = s; });
-            }
+            allSettings = settings || [];
 
             // 3. Render
             grid.innerHTML = '';
             services.forEach(sName => {
-                const s = settingsMap[sName] || { 
+                if (!calendarViews[sName]) calendarViews[sName] = new Date();
+                
+                const defaultS = allSettings.find(s => s.service_name === sName && !s.specific_date) || { 
                     start_time: '08:00', end_time: '17:00', 
                     max_appointments_per_day: 20, slot_duration: 30 
                 };
@@ -765,39 +911,175 @@
                 const card = document.createElement('div');
                 card.className = 'specialty-card';
                 card.innerHTML = `
-                    <h3 style="margin-bottom:1.25rem; font-size:1.1rem; color:var(--primary); display:flex; align-items:center;">
-                        <i class="fas fa-stethoscope" style="margin-right:0.5rem; font-size:0.9rem;"></i> ${sName}
-                    </h3>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-                        <div class="form-group">
-                            <label class="form-label" style="font-size:0.8rem;">Début</label>
-                            <input type="time" class="form-input" id="start-${sName}" value="${s.start_time.substring(0, 5)}">
+                    <div style="border-bottom: 2px solid var(--primary-light); padding-bottom: 1rem;">
+                        <h3 style="margin-bottom:1rem; font-size:1.1rem; color:var(--primary); display:flex; align-items:center;">
+                            <i class="fas fa-stethoscope" style="margin-right:0.5rem;"></i> ${sName}
+                        </h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                            <div class="form-group">
+                                <label class="form-label" style="font-size:0.75rem;">Ouverture (Défaut)</label>
+                                <input type="time" class="form-input" id="start-${sName}" value="${defaultS.start_time.substring(0, 5)}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" style="font-size:0.75rem;">Fermeture (Défaut)</label>
+                                <input type="time" class="form-input" id="end-${sName}" value="${defaultS.end_time.substring(0, 5)}">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" style="font-size:0.8rem;">Fin</label>
-                            <input type="time" class="form-input" id="end-${sName}" value="${s.end_time.substring(0, 5)}">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                            <div class="form-group">
+                                <label class="form-label" style="font-size:0.75rem;">Capacité / jour</label>
+                                <input type="number" class="form-input" id="limit-${sName}" value="${defaultS.max_appointments_per_day}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" style="font-size:0.75rem;">Durée (min)</label>
+                                <select class="form-input" id="duration-${sName}">
+                                    <option value="15" ${defaultS.slot_duration == 15 ? 'selected' : ''}>15m</option>
+                                    <option value="20" ${defaultS.slot_duration == 20 ? 'selected' : ''}>20m</option>
+                                    <option value="30" ${defaultS.slot_duration == 30 ? 'selected' : ''}>30m</option>
+                                    <option value="60" ${defaultS.slot_duration == 60 ? 'selected' : ''}>1h</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; margin: 1rem 0 0; font-size:0.8rem;" 
+                            onclick="saveSpecialtySettings('${sName}')"><i class="fas fa-save"></i> Enregistrer Défaut</button>
+                    </div>
+
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; margin-bottom:0.75rem; color:var(--text-muted);">Gestion des exceptions (Bloquer/Modifier par jour)</div>
+                        <div class="admin-calendar-container" id="cal-container-${sName}">
+                            <!-- Calendar injected here -->
+                        </div>
+                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem; font-size:0.7rem; color:var(--text-muted);">
+                            <div style="display:flex; align-items:center; gap:3px;"><span style="width:8px; height:8px; background:#fee2e2; border-radius:2px;"></span> Bloqué</div>
+                            <div style="display:flex; align-items:center; gap:3px;"><span style="width:8px; height:8px; background:#fef3c7; border-radius:2px;"></span> Modifié</div>
                         </div>
                     </div>
-                    <div class="form-group" style="margin-top:0.75rem;">
-                        <label class="form-label" style="font-size:0.8rem;">Max RDV / jour</label>
-                        <input type="number" class="form-input" id="limit-${sName}" value="${s.max_appointments_per_day}" min="1">
-                    </div>
-                    <div class="form-group" style="margin-top:0.75rem;">
-                        <label class="form-label" style="font-size:0.8rem;">Durée créneau (min)</label>
-                        <select class="form-input" id="duration-${sName}">
-                            <option value="15" ${s.slot_duration == 15 ? 'selected' : ''}>15 min</option>
-                            <option value="20" ${s.slot_duration == 20 ? 'selected' : ''}>20 min</option>
-                            <option value="30" ${s.slot_duration == 30 ? 'selected' : ''}>30 min</option>
-                            <option value="45" ${s.slot_duration == 45 ? 'selected' : ''}>45 min</option>
-                            <option value="60" ${s.slot_duration == 60 ? 'selected' : ''}>1 heure</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" style="width:100%; margin-top:1rem; padding:0.6rem; font-size:0.85rem;" 
-                        onclick="saveSpecialtySettings('${sName}')">Enregistrer</button>
                 `;
                 grid.appendChild(card);
+                renderAdminCalendar(sName);
             });
         }
+
+        function renderAdminCalendar(sName) {
+            const container = document.getElementById(`cal-container-${sName}`);
+            const date = calendarViews[sName];
+            const year = date.getFullYear();
+            const month = date.getMonth();
+
+            const monthName = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(date);
+            
+            container.innerHTML = `
+                <div class="admin-calendar-header">
+                    <button class="btn-icon" onclick="changeAdminMonth('${sName}', -1)"><i class="fas fa-chevron-left" style="font-size:0.7rem;"></i></button>
+                    <span style="text-transform: capitalize;">${monthName}</span>
+                    <button class="btn-icon" onclick="changeAdminMonth('${sName}', 1)"><i class="fas fa-chevron-right" style="font-size:0.7rem;"></i></button>
+                </div>
+                <div class="admin-calendar-grid" id="grid-${sName}"></div>
+            `;
+
+            const grid = document.getElementById(`grid-${sName}`);
+            ['l', 'm', 'm', 'j', 'v', 's', 'd'].forEach(d => {
+                grid.innerHTML += `<div class="admin-calendar-day-label">${d}</div>`;
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            let emptyCells = firstDay === 0 ? 6 : firstDay - 1;
+            for (let i = 0; i < emptyCells; i++) grid.innerHTML += '<div class="admin-calendar-day disabled"></div>';
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date().toISOString().split('T')[0];
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDate = new Date(year, month, d);
+                dayDate.setMinutes(dayDate.getMinutes() - dayDate.getTimezoneOffset());
+                const dateStr = dayDate.toISOString().split('T')[0];
+                
+                const daySetting = allSettings.find(s => s.service_name === sName && s.specific_date === dateStr);
+                
+                let classes = 'admin-calendar-day';
+                if (dateStr === today) classes += ' today';
+                if (daySetting?.is_blocked) classes += ' blocked';
+                else if (daySetting) classes += ' custom';
+
+                grid.innerHTML += `<div class="${classes}" onclick="openDaySettingsModal('${sName}', '${dateStr}')">${d}</div>`;
+            }
+        }
+
+        window.changeAdminMonth = (sName, dir) => {
+            calendarViews[sName].setMonth(calendarViews[sName].getMonth() + dir);
+            renderAdminCalendar(sName);
+        };
+
+        window.openDaySettingsModal = (sName, dateStr) => {
+            selectedDayInfo = { service: sName, date: dateStr };
+            const daySetting = allSettings.find(s => s.service_name === sName && s.specific_date === dateStr);
+            const defaultS = allSettings.find(s => s.service_name === sName && !s.specific_date) || { 
+                start_time: '08:00', end_time: '17:00', max_appointments_per_day: 20, slot_duration: 30 
+            };
+
+            const displayDate = new Date(dateStr).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+            document.getElementById('modal-day-title').textContent = `Réglages du ${displayDate}`;
+            document.getElementById('modal-specialty-badge').textContent = sName;
+
+            const isBlocked = daySetting?.is_blocked || false;
+            document.getElementById('block-day-toggle').checked = isBlocked;
+            toggleDayBlock(isBlocked);
+
+            document.getElementById('day-start-time').value = (daySetting?.start_time || defaultS.start_time).substring(0, 5);
+            document.getElementById('day-end-time').value = (daySetting?.end_time || defaultS.end_time).substring(0, 5);
+            document.getElementById('day-limit').value = daySetting?.max_appointments_per_day || defaultS.max_appointments_per_day;
+            document.getElementById('day-duration').value = daySetting?.slot_duration || defaultS.slot_duration;
+
+            document.getElementById('day-settings-modal').classList.add('active');
+        };
+
+        window.toggleDayBlock = (val) => {
+            const form = document.getElementById('day-form-container');
+            const statusText = document.getElementById('day-status-text');
+            if (val) {
+                form.style.opacity = '0.4';
+                form.style.pointerEvents = 'none';
+                statusText.textContent = "Journée bloquée (Fermé)";
+                statusText.style.color = "#dc2626";
+            } else {
+                form.style.opacity = '1';
+                form.style.pointerEvents = 'auto';
+                statusText.textContent = "Ouvert aux réservations";
+                statusText.style.color = "var(--text-muted)";
+            }
+        };
+
+        window.closeDaySettingsModal = () => {
+            document.getElementById('day-settings-modal').classList.remove('active');
+        };
+
+        document.getElementById('save-day-btn').addEventListener('click', async () => {
+            const isBlocked = document.getElementById('block-day-toggle').checked;
+            const startTime = document.getElementById('day-start-time').value;
+            const endTime = document.getElementById('day-end-time').value;
+            const limit = parseInt(document.getElementById('day-limit').value);
+            const duration = parseInt(document.getElementById('day-duration').value);
+
+            const { error } = await supabase
+                .from('specialty_settings')
+                .upsert({
+                    hospital_id: adminProfile.hospital_id,
+                    service_name: selectedDayInfo.service,
+                    specific_date: selectedDayInfo.date,
+                    start_time: startTime + ':00',
+                    end_time: endTime + ':00',
+                    max_appointments_per_day: limit,
+                    slot_duration: duration,
+                    is_blocked: isBlocked
+                }, { onConflict: 'hospital_id, service_name, specific_date' });
+
+            if (error) {
+                alert("Erreur: " + error.message);
+            } else {
+                closeDaySettingsModal();
+                loadSpecialtySettings();
+            }
+        });
 
         async function saveSpecialtySettings(serviceName) {
             const startTime = document.getElementById(`start-${serviceName}`).value;
@@ -805,87 +1087,47 @@
             const limit = parseInt(document.getElementById(`limit-${serviceName}`).value);
             const duration = parseInt(document.getElementById(`duration-${serviceName}`).value);
 
-            if (!startTime || !endTime || isNaN(limit) || limit < 1) {
-                alert("Veuillez remplir correctement tous les champs.");
-                return;
-            }
-
             const { error } = await supabase
                 .from('specialty_settings')
                 .upsert({
                     hospital_id: adminProfile.hospital_id,
                     service_name: serviceName,
+                    specific_date: null,
                     start_time: startTime + ':00',
                     end_time: endTime + ':00',
                     max_appointments_per_day: limit,
                     slot_duration: duration
                 }, { onConflict: 'hospital_id, service_name' });
 
-            if (error) {
-                alert("Erreur lors de l'enregistrement: " + error.message);
-            } else {
-                alert(`Paramètres pour "${serviceName}" mis à jour avec succès !`);
+            if (error) alert("Erreur: " + error.message);
+            else {
+                alert(`Paramètres par défaut mis à jour !`);
+                loadSpecialtySettings();
             }
         }
 
-        // --- Modals ---
-        window.openConfirmModal = function (id) {
-            targetAppointmentId = id;
-            document.getElementById('confirm-modal').classList.add('active');
-        };
-
-        window.closeConfirmModal = function () {
-            targetAppointmentId = null;
-            document.getElementById('confirm-modal').classList.remove('active');
-        };
-
-        window.submitConfirmation = async function () {
+        // --- Modals common ---
+        window.openConfirmModal = (id) => { targetAppointmentId = id; document.getElementById('confirm-modal').classList.add('active'); };
+        window.closeConfirmModal = () => { targetAppointmentId = null; document.getElementById('confirm-modal').classList.remove('active'); };
+        window.submitConfirmation = async () => {
             if (!targetAppointmentId) return;
-
-            const { error } = await supabase
-                .from('appointments')
-                .update({ status: 'confirmed' })
-                .eq('id', targetAppointmentId);
-
-            if (error) {
-                alert("Erreur lors de la confirmation: " + error.message);
-            } else {
-                closeConfirmModal();
-                loadDashboard();
-            }
+            const { error } = await supabase.from('appointments').update({ status: 'confirmed' }).eq('id', targetAppointmentId);
+            if (error) alert("Erreur: " + error.message);
+            else { closeConfirmModal(); loadDashboard(); }
         };
 
-        window.openRejectModal = function (id) {
+        window.openRejectModal = (id) => {
             targetAppointmentId = id;
             document.getElementById('rejection-reason-input').value = '';
             document.getElementById('reject-modal').classList.add('active');
         };
-
-        window.closeRejectModal = function () {
-            targetAppointmentId = null;
-            document.getElementById('reject-modal').classList.remove('active');
-        };
-
-        window.submitRejection = async function () {
-            if (!targetAppointmentId) return;
+        window.closeRejectModal = () => { targetAppointmentId = null; document.getElementById('reject-modal').classList.remove('active'); };
+        window.submitRejection = async () => {
             const reason = document.getElementById('rejection-reason-input').value.trim();
-
-            if (!reason) {
-                alert("Veuillez indiquer un motif de rejet.");
-                return;
-            }
-
-            const { error } = await supabase
-                .from('appointments')
-                .update({ status: 'rejected', rejection_reason: reason })
-                .eq('id', targetAppointmentId);
-
-            if (error) {
-                alert("Erreur lors du rejet: " + error.message);
-            } else {
-                closeRejectModal();
-                loadDashboard();
-            }
+            if (!reason) return alert("Motif requis.");
+            const { error } = await supabase.from('appointments').update({ status: 'rejected', rejection_reason: reason }).eq('id', targetAppointmentId);
+            if (error) alert("Erreur: " + error.message);
+            else { closeRejectModal(); loadDashboard(); }
         };
 
     </script>

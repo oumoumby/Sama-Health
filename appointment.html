@@ -408,7 +408,8 @@
         let currentStep = 1;
         let appointmentData = { hospital: null, service: null, date: null, time: null, reason: '' };
         let currentDate = new Date();
-        let specialtySettings = null;
+        let specialtySettingsMap = {}; // { dateStr: settings }
+        let defaultSettings = { start_time: '08:00', end_time: '17:00', max_appointments_per_day: 20, slot_duration: 30 };
         let appointmentsCounts = {};
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -505,23 +506,28 @@
         async function fetchSpecialtySettings() {
             const { supabase } = await import('./supabase-client.js');
             
-            // 1. Get settings for this specialty
+            // 1. Get all settings for this month (to check for blocked days/overrides)
+            const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0];
+            const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).toISOString().split('T')[0];
+
             const { data: settings } = await supabase
                 .from('specialty_settings')
                 .select('*')
                 .eq('hospital_id', appointmentData.hospital.id)
                 .eq('service_name', appointmentData.service)
-                .single();
+                .or(`specific_date.is.null,and(specific_date.gte.${startOfMonth},specific_date.lte.${endOfMonth})`);
             
-            specialtySettings = settings || {
-                start_time: '08:00', end_time: '17:00',
-                max_appointments_per_day: 20, slot_duration: 30
-            };
+            specialtySettingsMap = {};
+            defaultSettings = { start_time: '08:00', end_time: '17:00', max_appointments_per_day: 20, slot_duration: 30 };
 
-            // 2. Get existing appointment counts for current month to show availability
-            const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0];
-            const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).toISOString().split('T')[0];
+            if (settings) {
+                settings.forEach(s => {
+                    if (s.specific_date) specialtySettingsMap[s.specific_date] = s;
+                    else defaultSettings = s;
+                });
+            }
 
+            // 2. Get existing appointment counts
             const { data: counts } = await supabase.rpc('get_appointment_counts', {
                 p_hospital_id: appointmentData.hospital.id,
                 p_service_name: appointmentData.service,
@@ -538,12 +544,10 @@
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             const monthYearLabel = document.getElementById('calendar-month-year');
-            
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
             
             monthYearLabel.textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(currentDate);
-            
             grid.innerHTML = '';
             ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].forEach(d => {
                 grid.innerHTML += `<div class="calendar-day-label">${d}</div>`;
@@ -551,32 +555,36 @@
 
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            // Adjust for Monday start (0=Sun, 1=Mon... in JS)
             let emptyCells = firstDay === 0 ? 6 : firstDay - 1;
-            for (let i = 0; i < emptyCells; i++) {
-                grid.innerHTML += '<div class="calendar-day disabled"></div>';
-            }
+            for (let i = 0; i < emptyCells; i++) grid.innerHTML += '<div class="calendar-day disabled"></div>';
 
             const today = new Date();
             today.setHours(0,0,0,0);
 
             for (let d = 1; d <= daysInMonth; d++) {
                 const date = new Date(year, month, d);
+                date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
                 const dateStr = date.toISOString().split('T')[0];
+                
+                const daySetting = specialtySettingsMap[dateStr] || defaultSettings;
                 const count = appointmentsCounts[dateStr] || 0;
-                const isFull = count >= (specialtySettings?.max_appointments_per_day || 20);
+                
+                const isBlocked = daySetting.is_blocked;
+                const isFull = count >= daySetting.max_appointments_per_day;
                 const isPast = date < today;
-                const isWeekend = date.getDay() === 0; // Just disable Sundays for demo
+                const isWeekend = date.getDay() === 0;
 
                 let classes = 'calendar-day';
-                if (isPast || isWeekend) classes += ' disabled';
+                let extraText = '';
+                if (isPast || isWeekend || isBlocked) classes += ' disabled';
                 else if (isFull) classes += ' full';
+                
+                if (isBlocked && !isPast && !isWeekend) extraText = '<span style="position:absolute; bottom:2px; left:0; width:100%; font-size:0.6rem; color:#ef4444;">Fermé</span>';
                 if (appointmentData.date && date.toDateString() === new Date(appointmentData.date).toDateString()) classes += ' selected';
                 if (date.toDateString() === today.toDateString()) classes += ' today';
 
-                const onClick = (isPast || isWeekend || isFull) ? '' : `onclick="selectDate('${date.toISOString()}', this)"`;
-                grid.innerHTML += `<div class="${classes}" ${onClick}>${d}</div>`;
+                const onClick = (isPast || isWeekend || isFull || isBlocked) ? '' : `onclick="selectDate('${date.toISOString()}', this)"`;
+                grid.innerHTML += `<div class="${classes}" ${onClick}>${d}${extraText}</div>`;
             }
         }
 
@@ -596,15 +604,15 @@
             const container = document.getElementById('time-slots');
             container.innerHTML = '';
             
-            if (!specialtySettings) return;
+            const selectedDateStr = new Date(appointmentData.date).toISOString().split('T')[0];
+            const settings = specialtySettingsMap[selectedDateStr] || defaultSettings;
 
-            const start = specialtySettings.start_time.split(':');
-            const end = specialtySettings.end_time.split(':');
-            const duration = specialtySettings.slot_duration;
+            const start = settings.start_time.split(':');
+            const end = settings.end_time.split(':');
+            const duration = settings.slot_duration || 30;
 
             let current = new Date();
             current.setHours(parseInt(start[0]), parseInt(start[1]), 0, 0);
-            
             const stop = new Date();
             stop.setHours(parseInt(end[0]), parseInt(end[1]), 0, 0);
 
@@ -616,7 +624,6 @@
                 slot.innerHTML = `<i class="fas fa-clock" style="font-size:0.7rem; margin-right:3px;"></i>${t}`;
                 slot.onclick = () => selectTime(t, slot);
                 container.appendChild(slot);
-                
                 current.setMinutes(current.getMinutes() + duration);
             }
         }

@@ -248,13 +248,22 @@ CREATE TABLE public.specialty_settings (
     id SERIAL PRIMARY KEY,
     hospital_id INT NOT NULL REFERENCES public.hospitals(id) ON DELETE CASCADE,
     service_name TEXT NOT NULL, -- On utilise le nom pour correspondre à appointments.service
+    specific_date DATE DEFAULT NULL, -- NULL = réglage par défaut, sinon réglage pour CE jour
     start_time TIME NOT NULL DEFAULT '08:00',
     end_time TIME NOT NULL DEFAULT '17:00',
     max_appointments_per_day INT NOT NULL DEFAULT 20,
     slot_duration INT NOT NULL DEFAULT 30, -- En minutes
+    is_blocked BOOLEAN DEFAULT false, -- Permet de fermer la journée
     is_active BOOLEAN DEFAULT true,
-    UNIQUE(hospital_id, service_name)
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Index unique pour éviter les doublons (Hôpital + Service + Date ou NULL)
+CREATE UNIQUE INDEX idx_specialty_unique_default ON public.specialty_settings (hospital_id, service_name) 
+WHERE specific_date IS NULL;
+
+CREATE UNIQUE INDEX idx_specialty_unique_date ON public.specialty_settings (hospital_id, service_name, specific_date) 
+WHERE specific_date IS NOT NULL;
 
 ALTER TABLE public.specialty_settings ENABLE ROW LEVEL SECURITY;
 
@@ -283,23 +292,31 @@ CREATE OR REPLACE FUNCTION public.book_appointment_safe(
 ) RETURNS UUID AS $$
 DECLARE
     v_limit INT;
+    v_is_blocked BOOLEAN;
     v_current_count INT;
     v_new_id UUID;
 BEGIN
-    -- 1. Récupérer la limite et VERROUILLER la ligne de paramètres pour cet hôpital/service
-    -- Cela empêche d'autres transactions de lire/modifier ces paramètres simultanément
-    SELECT max_appointments_per_day INTO v_limit
+    -- 1. Récupérer les paramètres (Date spécifique PRIORITAIRE sur par défaut)
+    -- On VERROUILLE pour éviter les modifications de limite pendant le calcul
+    SELECT max_appointments_per_day, is_blocked INTO v_limit, v_is_blocked
     FROM public.specialty_settings
-    WHERE hospital_id = p_hospital_id AND service_name = p_service_name
-    FOR SHARE; -- Share lock suffit pour lire la limite de façon cohérente
+    WHERE hospital_id = p_hospital_id 
+      AND service_name = p_service_name
+      AND (specific_date = p_appointment_date OR specific_date IS NULL)
+    ORDER BY specific_date DESC -- Prend la date spécifique (non NULL) en premier
+    LIMIT 1
+    FOR SHARE;
 
-    -- Si pas de paramètre spécifique, on prend une limite par défaut (ex: 50)
-    IF v_limit IS NULL THEN
-        v_limit := 50;
+    -- 2. Vérifications de base
+    IF v_is_blocked = true THEN
+        RAISE EXCEPTION 'Cette journée est fermée aux réservations pour cette spécialité.';
     END IF;
 
-    -- 2. Compter les rendez-vous existants (Sauf rejetés/annulés) 
-    -- On utilise un verrou de lecture sur les rendez-vous du même jour/service via un index
+    IF v_limit IS NULL THEN
+        v_limit := 50; -- Par défaut si rien n'est configuré
+    END IF;
+
+    -- 3. Compter les rendez-vous existants
     SELECT COUNT(*) INTO v_current_count
     FROM public.appointments
     WHERE hospital_id = p_hospital_id 
@@ -307,12 +324,12 @@ BEGIN
       AND appointment_date = p_appointment_date
       AND status NOT IN ('rejected', 'cancelled');
 
-    -- 3. Vérifier le seuil
+    -- 4. Vérifier le seuil
     IF v_current_count >= v_limit THEN
         RAISE EXCEPTION 'Capacité maximale atteinte pour cette spécialité aujourd''hui.';
     END IF;
 
-    -- 4. Insérer le rendez-vous
+    -- 5. Insérer
     INSERT INTO public.appointments (
         user_id, hospital_id, service, appointment_date, appointment_time, status
     ) VALUES (
